@@ -1,0 +1,153 @@
+{% extends 'layout.html' %}
+
+{% block title %}Barbeiros Disponíveis - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-cut me-2"></i>Barbeiros Disponíveis</h2>
+        <p class="text-muted">Escolha um barbeiro para agendar seu corte</p>
+    </div>
+</div>
+
+<!-- Agendamentos futuros -->
+{% if agendamentos %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="far fa-calendar-alt me-2"></i>Seus Próximos Agendamentos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Barbeiro</th>
+                                    <th>Data e Hora</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for agendamento in agendamentos %}
+                                    <tr>
+                                        <td>
+                                            <img src="{{ url_for('common.uploaded_file', filename=agendamento.barbeiro.foto_perfil) }}" 
+                                                 alt="Foto do Barbeiro" 
+                                                 class="rounded-circle me-2" 
+                                                 style="width: 30px; height: 30px; object-fit: cover;">
+                                            {{ agendamento.barbeiro.nome }}
+                                        </td>
+                                        <td>{{ agendamento.data_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+                                        <td><span class="badge bg-primary">Agendado</span></td>
+                                        <td>
+                                            <form action="{{ url_for('cliente.cancelar_agendamento', agendamento_id=agendamento.id) }}" method="POST" class="d-inline confirm-form" data-confirm="Tem certeza que deseja cancelar este agendamento?">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-times me-1"></i>Cancelar
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('cliente.agendamentos') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-1"></i>Ver Todos os Agendamentos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Lista de Barbeiros -->
+<div class="row mb-4">
+    {% if barbeiros %}
+        {% for barbeiro in barbeiros %}
+            <div class="col-md-4 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header text-center">
+                        <img src="{{ url_for('common.uploaded_file', filename=barbeiro.foto_perfil) }}" 
+                             alt="Foto do Barbeiro" 
+                             class="rounded-circle profile-avatar" 
+                             style="width: 100px; height: 100px; object-fit: cover; margin-top: -50px; border: 3px solid white;">
+                        <h5 class="mt-2 mb-0">{{ barbeiro.nome }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center mb-3">
+                            <div class="badge bg-success me-2">
+                                <i class="fas fa-check-circle me-1"></i>Barbeiro Ativo
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mb-4">
+                            <p>
+                                <i class="fas fa-id-card me-2"></i>
+                                {% if barbeiro.numero_aluno %}
+                                    Aluno #{{ barbeiro.numero_aluno }}
+                                {% else %}
+                                    Barbeiro Profissional
+                                {% endif %}
+                            </p>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <a href="{{ url_for('cliente.horarios_barbeiro', barbeiro_id=barbeiro.id) }}" class="btn btn-camo">
+                                <i class="far fa-calendar-plus me-1"></i>Agendar Horário
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>Não há barbeiros disponíveis no momento. Por favor, volte mais tarde.
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Banner e informações -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h4>Bem-vindo à Safa Barbeiros CIASC</h4>
+                        <p>Somos especializados em cortes militares e clássicos, trazendo o melhor estilo para você!</p>
+                        <ul>
+                            <li>Agendamento online rápido e fácil</li>
+                            <li>Profissionais especializados</li>
+                            <li>Ambiente limpo e confortável</li>
+                            <li>Localização privilegiada dentro do CIASC</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <img src="https://pixabay.com/get/gbf241a3f16180ba04bac443b4163f1e79f4e55943a9c2dbe1d00b4dec2133451eb6b0ea7e5d943977093268dca6238de945e5da84cd5a02f0ecc81c91ec6f5c9_1280.jpg" alt="Interior da Barbearia" class="img-fluid rounded">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <img src="https://pixabay.com/get/g986098e0ad9b831d5b4528acec1ab0c3eac962fd1c89836cc8a30c4a0c2dcec3beea0a55350ac4f8a734630564360554e39d8bad65551c8e9135b9493aaa68e0_1280.jpg" alt="Corte de Cabelo" class="img-fluid rounded">
+                            </div>
+                            <div class="col-6">
+                                <img src="https://pixabay.com/get/ged570a082026f7e9d3f8cabc202cb34855e0d8978526fd6562bdc3b727b950c313a504f7797060e4c41889efd891038c8f8cc026adb87098fbf6c5069068a2aa_1280.jpg" alt="Equipamentos de Barbeiro" class="img-fluid rounded">
+                            </div>
+                            <div class="col-6">
+                                <img src="https://pixabay.com/get/gcd5a9153838b4b08eac0fbabe547f5bbf70d51b0a2b2b7f568fb28fb8936afa9a4f0406aa82f2cd2d3dfbf00ce2e3029581323bc377451bf08bbb7dcf073d2d8_1280.jpg" alt="Equipamentos de Barbeiro" class="img-fluid rounded">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

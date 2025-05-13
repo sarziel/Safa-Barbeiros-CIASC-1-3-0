@@ -1,0 +1,156 @@
+{% extends 'layout.html' %}
+
+{% block title %}Meus Horários - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="far fa-clock me-2"></i>Meus Horários</h2>
+        <p class="text-muted">Gerencie seus horários de disponibilidade para atendimento</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <button type="button" class="btn btn-camo" data-bs-toggle="modal" data-bs-target="#adicionarHorarioModal">
+            <i class="fas fa-plus me-2"></i>Adicionar Horário
+        </button>
+    </div>
+</div>
+
+<!-- Tabela de horários -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-week me-2"></i>Horários Cadastrados</h5>
+            </div>
+            <div class="card-body">
+                {% if horarios %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Dia da Semana</th>
+                                    <th>Horário</th>
+                                    <th>Duração</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for horario in horarios %}
+                                    <tr>
+                                        <td>{{ dias_semana[horario.dia_semana] }}</td>
+                                        <td>{{ horario.hora_inicio.strftime('%H:%M') }} às {{ horario.hora_fim.strftime('%H:%M') }}</td>
+                                        <td>
+                                            {% set duracao_minutos = ((horario.hora_fim.hour * 60 + horario.hora_fim.minute) - (horario.hora_inicio.hour * 60 + horario.hora_inicio.minute)) %}
+                                            {% set horas = (duracao_minutos // 60) %}
+                                            {% set minutos = (duracao_minutos % 60) %}
+                                            
+                                            {% if horas > 0 %}
+                                                {{ horas }}h
+                                                {% if minutos > 0 %}
+                                                    {{ minutos }}min
+                                                {% endif %}
+                                            {% else %}
+                                                {{ minutos }}min
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <form action="{{ url_for('barbeiro.excluir_horario', horario_id=horario.id) }}" method="POST" class="d-inline confirm-form" data-confirm="Tem certeza que deseja excluir este horário? Se houver agendamentos futuros relacionados, esta ação não será permitida.">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash me-1"></i>Excluir
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>Você ainda não tem horários cadastrados. Clique em "Adicionar Horário" para começar.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informações sobre horários -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações sobre Horários</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-primary">
+                    <h5><i class="fas fa-lightbulb me-2"></i>Como funciona?</h5>
+                    <p>Os horários que você cadastrar ficarão disponíveis para que os clientes possam agendar cortes com você nos dias e horários específicos.</p>
+                    <ul>
+                        <li>Cada horário é dividido em slots de 30 minutos para agendamentos.</li>
+                        <li>Você pode definir diferentes horários para cada dia da semana.</li>
+                        <li>Se você precisar se ausentar em uma data específica, exclua o horário com antecedência.</li>
+                        <li>Não é possível excluir um horário que já possui agendamentos futuros.</li>
+                    </ul>
+                </div>
+                
+                <div class="alert alert-warning mb-0">
+                    <h5><i class="fas fa-exclamation-triangle me-2"></i>Importante</h5>
+                    <p>Mantenha seus horários sempre atualizados para evitar conflitos e garantir a satisfação dos clientes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para adicionar horário -->
+<div class="modal fade" id="adicionarHorarioModal" tabindex="-1" aria-labelledby="adicionarHorarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header camo-pattern">
+                <h5 class="modal-title" id="adicionarHorarioModalLabel">Adicionar Novo Horário</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form action="{{ url_for('barbeiro.horarios') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="dia_semana" class="form-label">Dia da Semana</label>
+                        <select class="form-select" id="dia_semana" name="dia_semana" required>
+                            <option value="" selected disabled>Selecione o dia da semana</option>
+                            <option value="0">Segunda-feira</option>
+                            <option value="1">Terça-feira</option>
+                            <option value="2">Quarta-feira</option>
+                            <option value="3">Quinta-feira</option>
+                            <option value="4">Sexta-feira</option>
+                            <option value="5">Sábado</option>
+                            <option value="6">Domingo</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="hora_inicio" class="form-label">Hora de Início</label>
+                            <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="hora_fim" class="form-label">Hora de Término</label>
+                            <input type="time" class="form-control" id="hora_fim" name="hora_fim" required>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>Os clientes poderão agendar em slots de 30 minutos dentro deste intervalo.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-camo">
+                        <i class="fas fa-save me-1"></i>Salvar Horário
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

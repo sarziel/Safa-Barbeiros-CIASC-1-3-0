@@ -1,0 +1,150 @@
+{% extends 'layout.html' %}
+
+{% block title %}Editar Usuário - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-user-edit me-2"></i>Editar Usuário</h2>
+        <p class="text-muted">Atualize as informações do usuário</p>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-edit me-2"></i>Editando: {{ usuario.nome }}
+            {% if usuario.tipo == 'admin' %}
+                <span class="badge bg-danger ms-2">Administrador</span>
+            {% elif usuario.tipo == 'barbeiro' %}
+                <span class="badge bg-primary ms-2">Barbeiro</span>
+            {% elif usuario.tipo == 'cliente' %}
+                <span class="badge bg-success ms-2">Cliente</span>
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('admin.editar_usuario', user_id=usuario.id) }}" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Dados básicos -->
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">Nome Completo</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="nome" name="nome" value="{{ usuario.nome }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="nova_senha" class="form-label">Nova Senha (deixe em branco para manter a atual)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="nova_senha" name="nova_senha">
+                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="nova_senha">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {% if usuario.tipo in ['cliente', 'barbeiro'] %}
+                        <div class="mb-3">
+                            <label for="numero_aluno" class="form-label">Número de Aluno (4 dígitos)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                <input type="text" class="form-control" id="numero_aluno" name="numero_aluno" maxlength="4" value="{{ usuario.numero_aluno or '' }}">
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if usuario.tipo == 'barbeiro' %}
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" {% if usuario.ativo %}checked{% endif %}>
+                                <label class="form-check-label" for="ativo">Barbeiro Ativo</label>
+                            </div>
+                            <small class="form-text text-muted">Se desativado, o barbeiro não poderá acessar o sistema ou receber agendamentos.</small>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="col-md-6">
+                    <!-- Upload de foto de perfil -->
+                    <div class="mb-3">
+                        <label for="foto" class="form-label">Foto de Perfil</label>
+                        <div class="text-center mb-3">
+                            <img src="{{ url_for('common.uploaded_file', filename=usuario.foto_perfil) }}" 
+                                alt="Foto de Perfil" 
+                                class="rounded-circle profile-avatar" 
+                                style="width: 150px; height: 150px; object-fit: cover;">
+                        </div>
+                        <div id="drop-area" class="card p-3 text-center mb-3">
+                            <div class="card-body">
+                                <i class="fas fa-cloud-upload-alt fa-2x mb-3 text-muted"></i>
+                                <p>Arraste uma nova imagem aqui ou</p>
+                                <input type="file" class="form-control" id="foto" name="foto" accept="image/jpeg,image/png">
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <img id="foto-preview" src="" class="preview-image" style="display: none;">
+                        </div>
+                        <small class="form-text text-muted">Deixe em branco para manter a foto atual. Tamanho máximo: 5MB.</small>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle me-2"></i>Informações do Usuário</h5>
+                        <ul class="mb-0">
+                            <li><strong>Tipo:</strong> {{ usuario.tipo|capitalize }}</li>
+                            <li><strong>Data de Cadastro:</strong> {{ usuario.data_criacao.strftime('%d/%m/%Y %H:%M') }}</li>
+                            {% if usuario.tipo == 'barbeiro' %}
+                                <li><strong>Status:</strong> {% if usuario.ativo %}Ativo{% else %}Inativo{% endif %}</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('admin.usuarios') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Voltar
+                        </a>
+                        <button type="submit" class="btn btn-camo">
+                            <i class="fas fa-save me-1"></i>Salvar Alterações
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Validação do número de aluno
+    document.addEventListener('DOMContentLoaded', function() {
+        const numeroAlunoInput = document.getElementById('numero_aluno');
+        if (numeroAlunoInput) {
+            numeroAlunoInput.addEventListener('input', function() {
+                // Remover caracteres não numéricos
+                this.value = this.value.replace(/\D/g, '');
+                
+                // Limitar a 4 dígitos
+                if (this.value.length > 4) {
+                    this.value = this.value.substring(0, 4);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

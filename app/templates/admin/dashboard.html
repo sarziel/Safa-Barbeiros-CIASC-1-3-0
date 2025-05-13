@@ -1,0 +1,255 @@
+{% extends 'layout.html' %}
+
+{% block title %}Dashboard Administrativo - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-chart-line me-2"></i>Dashboard Administrativo</h2>
+        <p class="text-muted">Bem-vindo(a) ao painel administrativo, {{ current_user.nome }}</p>
+    </div>
+</div>
+
+<!-- Cards de estatísticas -->
+<div class="row">
+    <!-- Total de clientes -->
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4 text-center">
+                        <i class="fas fa-users dashboard-card-icon"></i>
+                    </div>
+                    <div class="col-8">
+                        <div class="dashboard-card-value">{{ total_clientes }}</div>
+                        <div class="dashboard-card-title">Clientes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total de barbeiros -->
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4 text-center">
+                        <i class="fas fa-cut dashboard-card-icon"></i>
+                    </div>
+                    <div class="col-8">
+                        <div class="dashboard-card-value">{{ total_barbeiros }}</div>
+                        <div class="dashboard-card-title">Barbeiros</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Barbeiros ativos -->
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4 text-center">
+                        <i class="fas fa-user-check dashboard-card-icon"></i>
+                    </div>
+                    <div class="col-8">
+                        <div class="dashboard-card-value">{{ barbeiros_ativos }}</div>
+                        <div class="dashboard-card-title">Barbeiros Ativos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Agendamentos hoje -->
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4 text-center">
+                        <i class="fas fa-calendar-day dashboard-card-icon"></i>
+                    </div>
+                    <div class="col-8">
+                        <div class="dashboard-card-value">{{ agendamentos_hoje }}</div>
+                        <div class="dashboard-card-title">Agendamentos Hoje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Segunda linha de cards -->
+<div class="row">
+    <!-- Vendas hoje -->
+    <div class="col-md-4 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4 text-center">
+                        <i class="fas fa-cash-register dashboard-card-icon"></i>
+                    </div>
+                    <div class="col-8">
+                        <div class="dashboard-card-value">{{ vendas_hoje }}</div>
+                        <div class="dashboard-card-title">Vendas Hoje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Valor vendas hoje -->
+    <div class="col-md-8 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-3 text-center">
+                        <i class="fas fa-money-bill-wave dashboard-card-icon"></i>
+                    </div>
+                    <div class="col-9">
+                        <div class="dashboard-card-value">R$ {{ "%.2f"|format(valor_vendas_hoje) }}</div>
+                        <div class="dashboard-card-title">Valor Total de Vendas Hoje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos e tabelas -->
+<div class="row">
+    <!-- Gráfico de agendamentos por dia da semana -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Agendamentos por Dia da Semana</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="agendamentosChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico de vendas por barbeiro -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Vendas por Barbeiro (Últimos 30 dias)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="vendasChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela de últimos agendamentos -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Últimos Agendamentos</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Barbeiro</th>
+                                <th>Data/Hora</th>
+                                <th>Status</th>
+                                <th>Data de Criação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agendamento in ultimos_agendamentos %}
+                                <tr>
+                                    <td>{{ agendamento.cliente.nome }}</td>
+                                    <td>{{ agendamento.barbeiro.nome }}</td>
+                                    <td>{{ agendamento.data_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>
+                                        {% if agendamento.status == 'agendado' %}
+                                            <span class="badge bg-primary">Agendado</span>
+                                        {% elif agendamento.status == 'concluido' %}
+                                            <span class="badge bg-success">Concluído</span>
+                                        {% elif agendamento.status == 'cancelado' %}
+                                            <span class="badge bg-danger">Cancelado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ agendamento.data_criacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Nenhum agendamento encontrado</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Links rápidos -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-link me-2"></i>Links Rápidos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('admin.usuarios') }}" class="btn btn-camo w-100">
+                            <i class="fas fa-users me-2"></i>Gerenciar Usuários
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('admin.permissoes') }}" class="btn btn-camo w-100">
+                            <i class="fas fa-user-shield me-2"></i>Gerenciar Permissões
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('admin.adicionar_admin') }}" class="btn btn-camo w-100">
+                            <i class="fas fa-user-plus me-2"></i>Adicionar Administrador
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dados para o gráfico de agendamentos por dia da semana
+        const diasSemana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+        const valoresAgendamentos = [15, 12, 18, 22, 25, 10, 5]; // Valores de exemplo
+        
+        // Criar gráfico de agendamentos
+        createAdminAgendamentosChart('agendamentosChart', {
+            labels: diasSemana,
+            values: valoresAgendamentos
+        });
+        
+        // Dados para o gráfico de vendas por barbeiro
+        const dadosVendas = [
+            { barbeiro: 'João Silva', valor: 1200.50 },
+            { barbeiro: 'Carlos Oliveira', valor: 980.00 },
+            { barbeiro: 'Pedro Santos', valor: 1450.75 },
+            { barbeiro: 'André Martins', valor: 850.25 },
+            { barbeiro: 'Lucas Pereira', valor: 1100.00 }
+        ];
+        
+        // Criar gráfico de vendas
+        createAdminVendasChart('vendasChart', dadosVendas);
+    });
+</script>
+{% endblock %}

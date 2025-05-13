@@ -1,0 +1,152 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gerenciar Usuários - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="fas fa-users me-2"></i>Gerenciar Usuários</h2>
+        <p class="text-muted">Gerencie todos os usuários cadastrados no sistema</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('admin.adicionar_admin') }}" class="btn btn-camo">
+            <i class="fas fa-user-plus me-2"></i>Adicionar Administrador
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4 shadow">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <form action="{{ url_for('admin.usuarios') }}" method="GET">
+                    <div class="input-group">
+                        <label class="input-group-text" for="tipo_filtro">
+                            <i class="fas fa-filter me-1"></i>Filtrar por:
+                        </label>
+                        <select class="form-select" id="tipo_filtro" name="tipo" onchange="this.form.submit()">
+                            <option value="todos" {% if tipo_filtro == 'todos' %}selected{% endif %}>Todos os Usuários</option>
+                            <option value="clientes" {% if tipo_filtro == 'clientes' %}selected{% endif %}>Clientes</option>
+                            <option value="barbeiros" {% if tipo_filtro == 'barbeiros' %}selected{% endif %}>Barbeiros</option>
+                            <option value="admins" {% if tipo_filtro == 'admins' %}selected{% endif %}>Administradores</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Usuários -->
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Lista de Usuários</h5>
+    </div>
+    <div class="card-body">
+        {% if usuarios %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Foto</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Tipo</th>
+                            <th>Data de Cadastro</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                            <tr>
+                                <td>
+                                    <img src="{{ url_for('common.uploaded_file', filename=usuario.foto_perfil) }}" 
+                                         alt="Foto de Perfil" 
+                                         class="rounded-circle" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                </td>
+                                <td>{{ usuario.nome }}</td>
+                                <td>{{ usuario.email }}</td>
+                                <td>
+                                    {% if usuario.tipo == 'admin' %}
+                                        <span class="badge bg-danger">Administrador</span>
+                                    {% elif usuario.tipo == 'barbeiro' %}
+                                        <span class="badge bg-primary">Barbeiro</span>
+                                    {% elif usuario.tipo == 'cliente' %}
+                                        <span class="badge bg-success">Cliente</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ usuario.data_criacao.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    {% if usuario.tipo == 'barbeiro' %}
+                                        {% if usuario.ativo %}
+                                            <span class="badge bg-success">Ativo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inativo</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-secondary">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('admin.editar_usuario', user_id=usuario.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% if usuario.id != current_user.id %}
+                                            <form action="{{ url_for('admin.excluir_usuario', user_id=usuario.id) }}" method="POST" class="d-inline confirm-form" data-confirm="Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>Nenhum usuário encontrado.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Informações adicionais -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="alert alert-success mb-0">
+                            <h5><i class="fas fa-user me-2"></i>Clientes</h5>
+                            <p>Podem visualizar barbeiros disponíveis e agendar cortes.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-primary mb-0">
+                            <h5><i class="fas fa-cut me-2"></i>Barbeiros</h5>
+                            <p>Podem definir horários, gerenciar agendamentos e registrar vendas.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-danger mb-0">
+                            <h5><i class="fas fa-user-shield me-2"></i>Administradores</h5>
+                            <p>Gerenciam usuários, permissões e têm acesso a todas as funções do sistema.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

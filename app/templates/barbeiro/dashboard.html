@@ -1,0 +1,283 @@
+{% extends 'layout.html' %}
+
+{% block title %}Dashboard do Barbeiro - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-chart-line me-2"></i>Dashboard Financeiro</h2>
+        <p class="text-muted">Bem-vindo(a), {{ current_user.nome }}</p>
+    </div>
+</div>
+
+<!-- Cards de estatísticas -->
+<div class="row">
+    <!-- Vendas de hoje -->
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4 text-center">
+                        <i class="fas fa-cash-register dashboard-card-icon"></i>
+                    </div>
+                    <div class="col-8">
+                        <div class="dashboard-card-value">R$ {{ "%.2f"|format(valor_vendas_hoje) }}</div>
+                        <div class="dashboard-card-title">Vendas Hoje</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vendas da semana -->
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4 text-center">
+                        <i class="fas fa-calendar-week dashboard-card-icon"></i>
+                    </div>
+                    <div class="col-8">
+                        <div class="dashboard-card-value">R$ {{ "%.2f"|format(valor_vendas_semana) }}</div>
+                        <div class="dashboard-card-title">Vendas na Semana</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vendas do mês -->
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4 text-center">
+                        <i class="fas fa-calendar-alt dashboard-card-icon"></i>
+                    </div>
+                    <div class="col-8">
+                        <div class="dashboard-card-value">R$ {{ "%.2f"|format(valor_vendas_mes) }}</div>
+                        <div class="dashboard-card-title">Vendas no Mês</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vendas fiadas -->
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4 text-center">
+                        <i class="fas fa-hand-holding-usd dashboard-card-icon"></i>
+                    </div>
+                    <div class="col-8">
+                        <div class="dashboard-card-value">R$ {{ "%.2f"|format(valor_vendas_fiadas) }}</div>
+                        <div class="dashboard-card-title">Vendas Fiadas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráfico de vendas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Vendas dos Últimos 7 Dias</h5>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;">
+                    <canvas id="vendasChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Agendamentos de hoje e vendas recentes -->
+<div class="row">
+    <!-- Agendamentos de hoje -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Agendamentos para Hoje</h5>
+            </div>
+            <div class="card-body">
+                {% if agendamentos_hoje %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Horário</th>
+                                    <th>Cliente</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for agendamento in agendamentos_hoje %}
+                                    <tr>
+                                        <td>{{ agendamento.data_hora.strftime('%H:%M') }}</td>
+                                        <td>
+                                            <img src="{{ url_for('common.uploaded_file', filename=agendamento.cliente.foto_perfil) }}" 
+                                                 alt="Foto de Perfil" 
+                                                 class="rounded-circle me-2" 
+                                                 style="width: 30px; height: 30px; object-fit: cover;">
+                                            {{ agendamento.cliente.nome }}
+                                        </td>
+                                        <td>
+                                            {% if agendamento.status == 'agendado' %}
+                                                <span class="badge bg-primary">Agendado</span>
+                                            {% elif agendamento.status == 'concluido' %}
+                                                <span class="badge bg-success">Concluído</span>
+                                            {% elif agendamento.status == 'cancelado' %}
+                                                <span class="badge bg-danger">Cancelado</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if agendamento.status == 'agendado' %}
+                                                <div class="btn-group">
+                                                    <form action="{{ url_for('barbeiro.atualizar_agendamento', agendamento_id=agendamento.id) }}" method="POST">
+                                                        <input type="hidden" name="status" value="concluido">
+                                                        <button type="submit" class="btn btn-sm btn-success me-1">
+                                                            <i class="fas fa-check me-1"></i>Concluir
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ url_for('barbeiro.atualizar_agendamento', agendamento_id=agendamento.id) }}" method="POST">
+                                                        <input type="hidden" name="status" value="cancelado">
+                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                            <i class="fas fa-times me-1"></i>Cancelar
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>Não há agendamentos para hoje.
+                    </div>
+                {% endif %}
+                
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('barbeiro.agendamentos') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-calendar-alt me-1"></i>Ver Todos os Agendamentos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Vendas recentes -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Vendas de Hoje</h5>
+            </div>
+            <div class="card-body">
+                {% if vendas_hoje %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Horário</th>
+                                    <th>Descrição</th>
+                                    <th>Cliente</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for venda in vendas_hoje %}
+                                    <tr>
+                                        <td>{{ venda.data.strftime('%H:%M') }}</td>
+                                        <td>{{ venda.descricao }}</td>
+                                        <td>
+                                            {% if venda.cliente %}
+                                                {{ venda.cliente.nome }}
+                                                {% if venda.tipo == 'fiada' %}
+                                                    <span class="badge bg-warning text-dark">Fiada</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>R$ {{ "%.2f"|format(venda.valor) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-success">
+                                    <th colspan="3" class="text-end">Total:</th>
+                                    <th>R$ {{ "%.2f"|format(valor_vendas_hoje) }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>Não há vendas registradas hoje.
+                    </div>
+                {% endif %}
+                
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('barbeiro.vendas') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-cash-register me-1"></i>Registrar Nova Venda
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Links rápidos -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-link me-2"></i>Links Rápidos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('barbeiro.horarios') }}" class="btn btn-camo w-100">
+                            <i class="far fa-clock me-2"></i>Gerenciar Horários
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('barbeiro.vendas') }}" class="btn btn-camo w-100">
+                            <i class="fas fa-cash-register me-2"></i>PDV Vendas
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('barbeiro.agendamentos') }}" class="btn btn-camo w-100">
+                            <i class="far fa-calendar-alt me-2"></i>Todos os Agendamentos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dados para o gráfico de vendas por dia
+        const dadosVendas = {{ dados_grafico|tojson }};
+        
+        // Criar gráfico de vendas
+        createBarberChart('vendasChart', dadosVendas);
+    });
+</script>
+{% endblock %}

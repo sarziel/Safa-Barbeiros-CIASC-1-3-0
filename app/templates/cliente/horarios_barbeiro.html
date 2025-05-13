@@ -1,0 +1,110 @@
+{% extends 'layout.html' %}
+
+{% block title %}Agendar Horário - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="far fa-calendar-plus me-2"></i>Agendar Horário</h2>
+        <p class="text-muted">Escolha um horário disponível para seu atendimento</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('cliente.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Voltar para Barbeiros
+        </a>
+    </div>
+</div>
+
+<!-- Informações do barbeiro -->
+<div class="card mb-4 shadow">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                <img src="{{ url_for('common.uploaded_file', filename=barbeiro.foto_perfil) }}" 
+                     alt="Foto do Barbeiro" 
+                     class="rounded-circle profile-avatar" 
+                     style="width: 100px; height: 100px; object-fit: cover;">
+            </div>
+            <div class="col-md-10">
+                <h4 class="mb-2">{{ barbeiro.nome }}</h4>
+                <p class="mb-1">
+                    <i class="fas fa-id-card me-2"></i>
+                    {% if barbeiro.numero_aluno %}
+                        Aluno #{{ barbeiro.numero_aluno }}
+                    {% else %}
+                        Barbeiro Profissional
+                    {% endif %}
+                </p>
+                <div class="badge bg-success">
+                    <i class="fas fa-check-circle me-1"></i>Disponível para Agendamentos
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulário de agendamento -->
+<form action="{{ url_for('cliente.agendar') }}" method="POST">
+    <input type="hidden" name="barbeiro_id" value="{{ barbeiro.id }}">
+    <input type="hidden" name="data_hora" id="data_hora" value="">
+    
+    <!-- Agenda com horários disponíveis -->
+    <div class="row">
+        {% for dia in agenda %}
+            <div class="col-md-4 mb-4">
+                <div class="calendar-day">
+                    <div class="calendar-day-header">
+                        <div>{{ dia.dia_semana }}</div>
+                        <div>{{ dia.data_formatada }}</div>
+                    </div>
+                    
+                    {% if dia.slots %}
+                        <div class="mt-3">
+                            {% for slot in dia.slots %}
+                                <div class="time-slot" data-datetime="{{ slot.hora.strftime('%Y-%m-%d %H:%M:%S') }}">
+                                    <i class="far fa-clock me-2"></i>{{ slot.hora_formatada }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <i class="fas fa-exclamation-circle me-2"></i>Sem horários disponíveis
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <div class="row">
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-camo btn-lg" id="btn-agendar" disabled>
+                <i class="far fa-calendar-check me-2"></i>Confirmar Agendamento
+            </button>
+        </div>
+    </div>
+</form>
+
+<!-- Informações sobre agendamento -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações sobre Agendamento</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-0">
+                    <h5><i class="fas fa-lightbulb me-2"></i>Como funciona?</h5>
+                    <ol>
+                        <li>Clique em um horário disponível para selecioná-lo (os horários são divididos em slots de 30 minutos)</li>
+                        <li>Clique em "Confirmar Agendamento" para reservar seu horário</li>
+                        <li>Você receberá uma confirmação e poderá acompanhar seu agendamento na página "Meus Agendamentos"</li>
+                        <li>Caso precise cancelar, faça com pelo menos 1 hora de antecedência</li>
+                    </ol>
+                    <p><strong>Observação:</strong> Chegue 5 minutos antes do horário marcado para não perder seu agendamento.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

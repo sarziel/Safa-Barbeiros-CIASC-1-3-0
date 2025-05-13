@@ -1,0 +1,205 @@
+{% extends 'layout.html' %}
+
+{% block title %}Meus Agendamentos - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="far fa-calendar-alt me-2"></i>Meus Agendamentos</h2>
+        <p class="text-muted">Gerencie todos os seus agendamentos</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('barbeiro.horarios') }}" class="btn btn-camo">
+            <i class="far fa-clock me-2"></i>Gerenciar Horários
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4 shadow">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <form action="{{ url_for('barbeiro.agendamentos') }}" method="GET">
+                    <div class="input-group">
+                        <label class="input-group-text" for="status_filtro">
+                            <i class="fas fa-filter me-1"></i>Filtrar por:
+                        </label>
+                        <select class="form-select" id="status_filtro" name="status" onchange="this.form.submit()">
+                            <option value="todos" {% if status_filtro == 'todos' %}selected{% endif %}>Todos os Status</option>
+                            <option value="agendado" {% if status_filtro == 'agendado' %}selected{% endif %}>Agendados</option>
+                            <option value="concluido" {% if status_filtro == 'concluido' %}selected{% endif %}>Concluídos</option>
+                            <option value="cancelado" {% if status_filtro == 'cancelado' %}selected{% endif %}>Cancelados</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de agendamentos -->
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Lista de Agendamentos</h5>
+    </div>
+    <div class="card-body">
+        {% if agendamentos.items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Data e Hora</th>
+                            <th>Status</th>
+                            <th>Data da Solicitação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for agendamento in agendamentos.items %}
+                            <tr>
+                                <td>
+                                    <img src="{{ url_for('common.uploaded_file', filename=agendamento.cliente.foto_perfil) }}" 
+                                         alt="Foto de Perfil" 
+                                         class="rounded-circle me-2" 
+                                         style="width: 30px; height: 30px; object-fit: cover;">
+                                    {{ agendamento.cliente.nome }}
+                                </td>
+                                <td>{{ agendamento.data_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    {% if agendamento.status == 'agendado' %}
+                                        <span class="badge bg-primary">Agendado</span>
+                                    {% elif agendamento.status == 'concluido' %}
+                                        <span class="badge bg-success">Concluído</span>
+                                    {% elif agendamento.status == 'cancelado' %}
+                                        <span class="badge bg-danger">Cancelado</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ agendamento.data_criacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    {% if agendamento.status == 'agendado' %}
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton{{ agendamento.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-cog me-1"></i>Ações
+                                            </button>
+                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ agendamento.id }}">
+                                                <li>
+                                                    <form action="{{ url_for('barbeiro.atualizar_agendamento', agendamento_id=agendamento.id) }}" method="POST">
+                                                        <input type="hidden" name="status" value="concluido">
+                                                        <button type="submit" class="dropdown-item">
+                                                            <i class="fas fa-check text-success me-1"></i>Marcar como Concluído
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <li>
+                                                    <form action="{{ url_for('barbeiro.atualizar_agendamento', agendamento_id=agendamento.id) }}" method="POST">
+                                                        <input type="hidden" name="status" value="cancelado">
+                                                        <button type="submit" class="dropdown-item">
+                                                            <i class="fas fa-times text-danger me-1"></i>Cancelar Agendamento
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">Sem ações disponíveis</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Paginação -->
+            <nav aria-label="Navegação de páginas">
+                <ul class="pagination justify-content-center mt-4">
+                    {% if agendamentos.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('barbeiro.agendamentos', status=status_filtro, page=agendamentos.prev_num) }}" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in agendamentos.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            {% if page_num == agendamentos.page %}
+                                <li class="page-item active">
+                                    <a class="page-link" href="{{ url_for('barbeiro.agendamentos', status=status_filtro, page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('barbeiro.agendamentos', status=status_filtro, page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">...</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if agendamentos.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('barbeiro.agendamentos', status=status_filtro, page=agendamentos.next_num) }}" aria-label="Próximo">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Próximo">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>Nenhum agendamento encontrado com os filtros selecionados.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Informações sobre status -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Status de Agendamentos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="alert alert-primary mb-0">
+                            <h5><i class="fas fa-calendar-check me-2"></i>Agendado</h5>
+                            <p>O cliente reservou um horário e está esperando pelo atendimento.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-success mb-0">
+                            <h5><i class="fas fa-check-circle me-2"></i>Concluído</h5>
+                            <p>O atendimento foi realizado com sucesso.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="alert alert-danger mb-0">
+                            <h5><i class="fas fa-times-circle me-2"></i>Cancelado</h5>
+                            <p>O agendamento foi cancelado pelo cliente ou pelo barbeiro.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

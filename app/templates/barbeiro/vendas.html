@@ -1,0 +1,255 @@
+{% extends 'layout.html' %}
+
+{% block title %}PDV Vendas - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="fas fa-cash-register me-2"></i>PDV Vendas</h2>
+        <p class="text-muted">Registre suas vendas e controle suas finanças</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <button type="button" class="btn btn-camo" data-bs-toggle="modal" data-bs-target="#novaVendaModal">
+            <i class="fas fa-plus me-2"></i>Nova Venda
+        </button>
+    </div>
+</div>
+
+<!-- Histórico de vendas -->
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Histórico de Vendas</h5>
+    </div>
+    <div class="card-body">
+        {% if vendas.items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Cliente</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for venda in vendas.items %}
+                            <tr>
+                                <td>{{ venda.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>{{ venda.descricao }}</td>
+                                <td>
+                                    {% if venda.cliente %}
+                                        <img src="{{ url_for('common.uploaded_file', filename=venda.cliente.foto_perfil) }}" 
+                                             alt="Foto de Perfil" 
+                                             class="rounded-circle me-2" 
+                                             style="width: 30px; height: 30px; object-fit: cover;">
+                                        {{ venda.cliente.nome }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if venda.tipo == 'fiada' %}
+                                        <span class="badge bg-warning text-dark">Fiada</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Normal</span>
+                                    {% endif %}
+                                </td>
+                                <td>R$ {{ "%.2f"|format(venda.valor) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Paginação -->
+            <nav aria-label="Navegação de páginas">
+                <ul class="pagination justify-content-center mt-4">
+                    {% if vendas.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('barbeiro.vendas', page=vendas.prev_num) }}" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in vendas.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            {% if page_num == vendas.page %}
+                                <li class="page-item active">
+                                    <a class="page-link" href="{{ url_for('barbeiro.vendas', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('barbeiro.vendas', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#">...</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if vendas.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('barbeiro.vendas', page=vendas.next_num) }}" aria-label="Próximo">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Próximo">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>Nenhuma venda registrada até o momento.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Informações sobre tipos de venda -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Tipos de Venda</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-money-bill-wave me-2 text-success"></i>Venda Normal</h5>
+                                <p class="card-text">Venda de produtos ou serviços com pagamento no ato.</p>
+                                <ul>
+                                    <li>Não é necessário associar a um cliente específico</li>
+                                    <li>Registra apenas para controle financeiro</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-hand-holding-usd me-2 text-warning"></i>Venda Fiada</h5>
+                                <p class="card-text">Venda com pagamento futuro, precisa estar associada a um cliente.</p>
+                                <ul>
+                                    <li>Obrigatório selecionar um cliente</li>
+                                    <li>Registra a dívida no sistema</li>
+                                    <li>Facilita o controle de pagamentos pendentes</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para nova venda -->
+<div class="modal fade" id="novaVendaModal" tabindex="-1" aria-labelledby="novaVendaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header camo-pattern">
+                <h5 class="modal-title" id="novaVendaModalLabel">Registrar Nova Venda</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form action="{{ url_for('barbeiro.vendas') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="valor" class="form-label">Valor (R$)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="text" class="form-control money-input" id="valor" name="valor" required placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Descrição</label>
+                        <input type="text" class="form-control" id="descricao" name="descricao" required placeholder="Ex: Corte de cabelo">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label">Tipo de Venda</label>
+                        <select class="form-select" id="tipo" name="tipo" required>
+                            <option value="normal" selected>Normal</option>
+                            <option value="fiada">Fiada</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="cliente_container" style="display: none;">
+                        <label for="cliente_id" class="form-label">Cliente</label>
+                        <select class="form-select" id="cliente_id" name="cliente_id">
+                            <option value="" selected disabled>Selecione o cliente</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Obrigatório para venda fiada</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-camo">
+                        <i class="fas fa-save me-1"></i>Registrar Venda
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Exibir/ocultar seleção de cliente baseado no tipo de venda
+        const tipoSelect = document.getElementById('tipo');
+        const clienteContainer = document.getElementById('cliente_container');
+        
+        tipoSelect.addEventListener('change', function() {
+            if (this.value === 'fiada') {
+                clienteContainer.style.display = 'block';
+            } else {
+                clienteContainer.style.display = 'none';
+            }
+        });
+        
+        // Formatação de valor monetário
+        const valorInput = document.getElementById('valor');
+        
+        valorInput.addEventListener('input', function(e) {
+            // Remove qualquer caractere que não seja número ou ponto
+            let value = e.target.value.replace(/[^0-9.]/g, '');
+            
+            // Garante que só exista um ponto decimal
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Limita a duas casas decimais
+            if (parts.length > 1 && parts[1].length > 2) {
+                value = parts[0] + '.' + parts[1].substring(0, 2);
+            }
+            
+            e.target.value = value;
+        });
+    });
+</script>
+{% endblock %}

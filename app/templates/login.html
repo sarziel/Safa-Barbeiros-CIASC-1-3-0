@@ -1,0 +1,66 @@
+{% extends 'layout.html' %}
+
+{% block title %}Login - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header text-center">
+                <h3 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Acesso ao Sistema</h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h4 class="text-muted">Safa Barbeiros CIASC</h4>
+                    <p>Faça login para acessar sua conta</p>
+                </div>
+                
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" required placeholder="seu.email@exemplo.com">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="senha" class="form-label">Senha</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="senha" name="senha" required placeholder="Sua senha">
+                            <button class="btn btn-outline-secondary toggle-password" type="button" data-target="senha">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-camo btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Entrar
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <p>Não tem uma conta? <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Registre-se</a></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Imagens da barbearia -->
+        <div class="row mt-4">
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <img src="https://pixabay.com/get/g48d3279837a2da2a188d2adda4b488410913be890018a1822e5fcb7b3f7f1d46d5f59c31247ce55bb0730f649be5c4f615b14ed1a9ff196362a79fe00b319aa1_1280.jpg" class="card-img-top" alt="Interior da Barbearia" style="height: 200px; object-fit: cover;">
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <img src="https://pixabay.com/get/gff862e07566443f131b1a0b724df99bf7a4461eb792398ed87642de9f846f07b0c0e0295f88c74efdf0db88b5fdd0da7c8dd51701be074c7da94e7286ce82aff_1280.jpg" class="card-img-top" alt="Interior da Barbearia" style="height: 200px; object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

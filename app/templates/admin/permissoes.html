@@ -1,0 +1,94 @@
+{% extends 'layout.html' %}
+
+{% block title %}Gerenciar Permissões - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-user-shield me-2"></i>Gerenciar Permissões</h2>
+        <p class="text-muted">Ative ou desative os barbeiros no sistema</p>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-users-cog me-2"></i>Lista de Barbeiros</h5>
+    </div>
+    <div class="card-body">
+        {% if barbeiros %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Foto</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Número de Aluno</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for barbeiro in barbeiros %}
+                            <tr>
+                                <td>
+                                    <img src="{{ url_for('common.uploaded_file', filename=barbeiro.foto_perfil) }}" 
+                                         alt="Foto de Perfil" 
+                                         class="rounded-circle" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                </td>
+                                <td>{{ barbeiro.nome }}</td>
+                                <td>{{ barbeiro.email }}</td>
+                                <td>{{ barbeiro.numero_aluno or '-' }}</td>
+                                <td>
+                                    {% if barbeiro.ativo %}
+                                        <span class="badge bg-success">Ativo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inativo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form action="{{ url_for('admin.toggle_permissao', barbeiro_id=barbeiro.id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm {% if barbeiro.ativo %}btn-danger{% else %}btn-success{% endif %}">
+                                            {% if barbeiro.ativo %}
+                                                <i class="fas fa-user-times me-1"></i>Desativar
+                                            {% else %}
+                                                <i class="fas fa-user-check me-1"></i>Ativar
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>Não há barbeiros cadastrados no sistema.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações sobre Permissões</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li><strong>Barbeiros Ativos:</strong> Podem acessar o sistema, definir horários e atender clientes.</li>
+                    <li><strong>Barbeiros Inativos:</strong> Não podem acessar o sistema ou receber agendamentos.</li>
+                    <li><strong>Quando Desativar:</strong> Em caso de afastamento, férias ou desligamento do barbeiro.</li>
+                    <li><strong>Quando Ativar:</strong> Após validar os dados do barbeiro e confirmar sua disponibilidade.</li>
+                </ul>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i><strong>Atenção:</strong> Ao desativar um barbeiro, todos os seus agendamentos futuros permanecerão no sistema, mas ele não poderá receber novos agendamentos.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

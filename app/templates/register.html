@@ -1,0 +1,160 @@
+{% extends 'layout.html' %}
+
+{% block title %}Registrar - Safa Barbeiros CIASC{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header text-center">
+                <h3 class="mb-0"><i class="fas fa-user-plus me-2"></i>Criar Conta</h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h4 class="text-muted">Safa Barbeiros CIASC</h4>
+                    <p>Preencha o formulário para criar sua conta</p>
+                </div>
+                
+                <form method="POST" action="{{ url_for('auth.register') }}" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nome" class="form-label">Nome Completo</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <input type="text" class="form-control" id="nome" name="nome" required placeholder="Seu nome completo">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control" id="email" name="email" required placeholder="seu.email@exemplo.com">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="senha" class="form-label">Senha</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="senha" name="senha" required placeholder="Crie uma senha forte">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="senha">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted">A senha deve ter pelo menos 6 caracteres</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="senha_confirmacao" class="form-label">Confirmar Senha</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="senha_confirmacao" name="senha_confirmacao" required placeholder="Confirme sua senha">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="tipo" class="form-label">Tipo de Conta</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                                    <select class="form-select" id="tipo" name="tipo" required>
+                                        <option value="" selected disabled>Selecione o tipo de conta</option>
+                                        <option value="cliente">Cliente</option>
+                                        <option value="barbeiro">Barbeiro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3" id="numero_aluno_container">
+                                <label for="numero_aluno" class="form-label">Número de Aluno (4 dígitos)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                    <input type="text" class="form-control" id="numero_aluno" name="numero_aluno" maxlength="4" placeholder="0000">
+                                </div>
+                                <small class="form-text text-muted">Se você não for aluno, deixe em branco</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="foto" class="form-label">Foto de Perfil</label>
+                                <div id="drop-area" class="card p-3 text-center mb-3">
+                                    <div class="card-body">
+                                        <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-muted"></i>
+                                        <p>Arraste uma imagem aqui ou</p>
+                                        <input type="file" class="form-control" id="foto" name="foto" accept="image/jpeg,image/png">
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <img id="foto-preview" src="" class="preview-image" style="display: none;">
+                                </div>
+                                <small class="form-text text-muted">Tamanho máximo: 5MB. Formatos: JPG, JPEG, PNG</small>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h5><i class="fas fa-info-circle me-2"></i>Informações</h5>
+                                <p><strong>Cliente:</strong> Pode agendar horários com os barbeiros disponíveis.</p>
+                                <p><strong>Barbeiro:</strong> Pode definir horários disponíveis, gerenciar agendamentos e registrar vendas. Sua conta precisará ser aprovada por um administrador.</p>
+                            </div>
+                            
+                            <!-- Cortes de cabelo populares -->
+                            <div class="text-center mt-3">
+                                <p><strong>Cortes populares</strong></p>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <img src="https://pixabay.com/get/g272b4537ff9f68f381a86c3f0a7ab83147a33000f57af6abc3faa1d8645143ac1fae33318cb82fb16566be56520bffe04af284e23a85d56c09d855d36b2ac0eb_1280.jpg" alt="Corte de cabelo" class="img-fluid rounded" style="height: 100px; object-fit: cover; width: 100%;">
+                                    </div>
+                                    <div class="col-6">
+                                        <img src="https://pixabay.com/get/g9281b58927870143fe1b5b87e7cdf5dbf2a1e38542b0a478fd42a06d993827197bc22a4885658e0eb523e642f8c3d7bc619b94871cec1a90de12b63317d09089_1280.jpg" alt="Corte de cabelo" class="img-fluid rounded" style="height: 100px; object-fit: cover; width: 100%;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-camo btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Criar Conta
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <p>Já tem uma conta? <a href="{{ url_for('auth.login') }}" class="text-decoration-none">Faça login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    // Mostrar/ocultar campo de número de aluno conforme o tipo de conta
+    document.addEventListener('DOMContentLoaded', function() {
+        const tipoSelect = document.getElementById('tipo');
+        const numeroAlunoContainer = document.getElementById('numero_aluno_container');
+        
+        tipoSelect.addEventListener('change', function() {
+            if (this.value === 'cliente' || this.value === 'barbeiro') {
+                numeroAlunoContainer.style.display = 'block';
+            } else {
+                numeroAlunoContainer.style.display = 'none';
+            }
+        });
+        
+        // Inicializar validação de número de aluno
+        const numeroAlunoInput = document.getElementById('numero_aluno');
+        numeroAlunoInput.addEventListener('input', function() {
+            // Remover caracteres não numéricos
+            this.value = this.value.replace(/\D/g, '');
+            
+            // Limitar a 4 dígitos
+            if (this.value.length > 4) {
+                this.value = this.value.substring(0, 4);
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}
