@@ -74,6 +74,15 @@ mode = "sequential"
 task = "shell.exec"
 args = "python admin_setup.py"
 
+[[workflows.workflow]]
+name = "Migrate Database"
+author = 42641848
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python migrate_db.py"
+
 [[ports]]
 localPort = 5000
 externalPort = 80

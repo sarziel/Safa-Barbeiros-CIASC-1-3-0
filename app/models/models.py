@@ -1,40 +1,7 @@
 from datetime import datetime
-
-class OAuth:
-    def __init__(self, **kwargs):
-        self._id = kwargs.get('_id', ObjectId())
-        self.id = str(self._id)
-        self.user_id = kwargs.get('user_id')
-        self.browser_session_key = kwargs.get('browser_session_key')
-        self.provider = kwargs.get('provider')
-        self.token = kwargs.get('token')
-
-    def save(self):
-        from app import db
-        data = {
-            'user_id': self.user_id,
-            'browser_session_key': self.browser_session_key,
-            'provider': self.provider,
-            'token': self.token
-        }
-        if hasattr(self, '_id'):
-            db.oauth.update_one({'_id': self._id}, {'$set': data})
-        else:
-            result = db.oauth.insert_one(data)
-            self._id = result.inserted_id
-            self.id = str(self._id)
-
-    @staticmethod
-    def get(user_id, provider):
-        from app import db
-        oauth_data = db.oauth.find_one({'user_id': user_id, 'provider': provider})
-        return OAuth(**oauth_data) if oauth_data else None
-
-
+from bson import ObjectId
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import mongodb
-from bson import ObjectId
 
 class User(UserMixin):
     def __init__(self, **kwargs):
@@ -51,14 +18,12 @@ class User(UserMixin):
     @staticmethod
     def get(user_id):
         from app import db
-        try:
-            if isinstance(user_id, str) and len(user_id) == 24:
-                user_data = db.users.find_one({'_id': ObjectId(user_id)})
-            else:
-                user_data = db.users.find_one({'_id': user_id})
+        if isinstance(user_id, str):
+            if len(user_id) == 24:
+                user_id = ObjectId(user_id)
+            user_data = db.users.find_one({'_id': user_id})
             return User(**user_data) if user_data else None
-        except:
-            return None
+        return None
 
     def save(self):
         from app import db
@@ -101,10 +66,11 @@ class Cliente(User):
             'data_criacao': self.data_criacao,
             'numero_aluno': self.numero_aluno
         }
+        from app import db
         if hasattr(self, '_id'):
-            mongodb.db.users.update_one({'_id': ObjectId(self._id)}, {'$set': data})
+            db.users.update_one({'_id': self._id}, {'$set': data})
         else:
-            result = mongodb.db.users.insert_one(data)
+            result = db.users.insert_one(data)
             self._id = result.inserted_id
             self.id = str(self._id)
 
@@ -127,10 +93,11 @@ class Barbeiro(User):
             'numero_aluno': self.numero_aluno,
             'ativo': self.ativo
         }
+        from app import db
         if hasattr(self, '_id'):
-            mongodb.db.users.update_one({'_id': ObjectId(self._id)}, {'$set': data})
+            db.users.update_one({'_id': self._id}, {'$set': data})
         else:
-            result = mongodb.db.users.insert_one(data)
+            result = db.users.insert_one(data)
             self._id = result.inserted_id
             self.id = str(self._id)
 
@@ -149,10 +116,11 @@ class Admin(User):
             'foto_perfil': self.foto_perfil,
             'data_criacao': self.data_criacao
         }
+        from app import db
         if hasattr(self, '_id'):
-            mongodb.db.users.update_one({'_id': ObjectId(self._id)}, {'$set': data})
+            db.users.update_one({'_id': self._id}, {'$set': data})
         else:
-            result = mongodb.db.users.insert_one(data)
+            result = db.users.insert_one(data)
             self._id = result.inserted_id
             self.id = str(self._id)
 
@@ -174,10 +142,11 @@ class Agendamento:
             'status': self.status,
             'data_criacao': self.data_criacao
         }
+        from app import db
         if hasattr(self, '_id'):
-            mongodb.db.agendamentos.update_one({'_id': self._id}, {'$set': data})
+            db.agendamentos.update_one({'_id': self._id}, {'$set': data})
         else:
-            result = mongodb.db.agendamentos.insert_one(data)
+            result = db.agendamentos.insert_one(data)
             self._id = result.inserted_id
             self.id = str(self._id)
 
@@ -199,10 +168,11 @@ class HorarioDisponivel:
             'hora_fim': self.hora_fim,
             'data_criacao': self.data_criacao
         }
+        from app import db
         if hasattr(self, '_id'):
-            mongodb.db.horarios_disponiveis.update_one({'_id': self._id}, {'$set': data})
+            db.horarios_disponiveis.update_one({'_id': self._id}, {'$set': data})
         else:
-            result = mongodb.db.horarios_disponiveis.insert_one(data)
+            result = db.horarios_disponiveis.insert_one(data)
             self._id = result.inserted_id
             self.id = str(self._id)
 
@@ -228,10 +198,11 @@ class Venda:
             'tipo': self.tipo,
             'data_criacao': self.data_criacao
         }
+        from app import db
         if hasattr(self, '_id'):
-            mongodb.db.vendas.update_one({'_id': self._id}, {'$set': data})
+            db.vendas.update_one({'_id': self._id}, {'$set': data})
         else:
-            result = mongodb.db.vendas.insert_one(data)
+            result = db.vendas.insert_one(data)
             self._id = result.inserted_id
             self.id = str(self._id)
 
@@ -251,9 +222,10 @@ class Permissao:
             'data_criacao': self.data_criacao,
             'data_modificacao': datetime.utcnow()
         }
+        from app import db
         if hasattr(self, '_id'):
-            mongodb.db.permissoes.update_one({'_id': self._id}, {'$set': data})
+            db.permissoes.update_one({'_id': self._id}, {'$set': data})
         else:
-            result = mongodb.db.permissoes.insert_one(data)
+            result = db.permissoes.insert_one(data)
             self._id = result.inserted_id
             self.id = str(self._id)
