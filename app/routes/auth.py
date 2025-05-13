@@ -97,14 +97,17 @@ def register():
             novo_usuario = Cliente(nome=nome, email=email, numero_aluno=numero_aluno, foto_perfil=foto_perfil)
         else:  # tipo == 'barbeiro'
             novo_usuario = Barbeiro(nome=nome, email=email, numero_aluno=numero_aluno, foto_perfil=foto_perfil, ativo=False)
-            # Criar permissão para o barbeiro
-            permissao = Permissao(barbeiro_id=novo_usuario.id, ativo=False)
-            db.session.add(permissao)
         
         novo_usuario.set_password(senha)
         
         db.session.add(novo_usuario)
         db.session.commit()
+        
+        # Agora que o usuário tem um ID, podemos criar a permissão para o barbeiro
+        if tipo == 'barbeiro':
+            permissao = Permissao(barbeiro_id=novo_usuario.id, ativo=False)
+            db.session.add(permissao)
+            db.session.commit()
         
         if tipo == 'barbeiro':
             flash('Registro realizado com sucesso! Sua conta precisa ser ativada por um administrador.', 'info')
