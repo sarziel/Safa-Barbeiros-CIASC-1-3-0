@@ -1,4 +1,36 @@
 from datetime import datetime
+
+class OAuth:
+    def __init__(self, **kwargs):
+        self._id = kwargs.get('_id', ObjectId())
+        self.id = str(self._id)
+        self.user_id = kwargs.get('user_id')
+        self.browser_session_key = kwargs.get('browser_session_key')
+        self.provider = kwargs.get('provider')
+        self.token = kwargs.get('token')
+
+    def save(self):
+        from app import db
+        data = {
+            'user_id': self.user_id,
+            'browser_session_key': self.browser_session_key,
+            'provider': self.provider,
+            'token': self.token
+        }
+        if hasattr(self, '_id'):
+            db.oauth.update_one({'_id': self._id}, {'$set': data})
+        else:
+            result = db.oauth.insert_one(data)
+            self._id = result.inserted_id
+            self.id = str(self._id)
+
+    @staticmethod
+    def get(user_id, provider):
+        from app import db
+        oauth_data = db.oauth.find_one({'user_id': user_id, 'provider': provider})
+        return OAuth(**oauth_data) if oauth_data else None
+
+
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import mongodb

@@ -11,6 +11,10 @@ logging.basicConfig(level=logging.DEBUG)
 mongodb = MongoClient("mongodb://mongo:UZOJNpqtUdDKjRHawTQJByTFPBUwTKvL@switchback.proxy.rlwy.net:23885")
 db = mongodb['safabarbeiros']  # Define o nome do banco de dados
 
+# Criar as coleções necessárias se não existirem
+db.users.create_index([('email', 1)], unique=True)
+db.users.create_index([('username', 1)], unique=True)
+
 # Inicialização do LoginManager
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
