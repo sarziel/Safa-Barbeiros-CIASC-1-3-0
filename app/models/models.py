@@ -51,8 +51,14 @@ class User(UserMixin):
     @staticmethod
     def get(user_id):
         from app import db
-        user_data = db.users.find_one({'_id': ObjectId(user_id)})
-        return User(**user_data) if user_data else None
+        try:
+            if isinstance(user_id, str) and len(user_id) == 24:
+                user_data = db.users.find_one({'_id': ObjectId(user_id)})
+            else:
+                user_data = db.users.find_one({'_id': user_id})
+            return User(**user_data) if user_data else None
+        except:
+            return None
 
     def save(self):
         from app import db

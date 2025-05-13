@@ -9,8 +9,12 @@ from pymongo import MongoClient
 logging.basicConfig(level=logging.DEBUG)
 
 # Inicialização do cliente MongoDB
-mongodb = MongoClient("mongodb://mongo:UZOJNpqtUdDKjRHawTQJByTFPBUwTKvL@switchback.proxy.rlwy.net:23885")
-db = mongodb['safabarbeiros']
+mongodb = MongoClient("mongodb://mongo:UZOJNpqtUdDKjRHawTQJByTFPBUwTKvL@switchback.proxy.rlwy.net:23885/safabarbeiros")
+db = mongodb.safabarbeiros
+
+# Inicialização do banco de dados
+db.users.create_index([('email', 1)], unique=True)
+db.users.create_index([('username', 1)], unique=True)
 
 # Inicialização do LoginManager
 login_manager = LoginManager()
