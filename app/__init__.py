@@ -9,12 +9,20 @@ from pymongo import MongoClient
 logging.basicConfig(level=logging.DEBUG)
 
 # Inicialização do cliente MongoDB
-mongodb = MongoClient("mongodb://mongo:UZOJNpqtUdDKjRHawTQJByTFPBUwTKvL@switchback.proxy.rlwy.net:23885/safabarbeiros")
+mongodb = MongoClient("mongodb://mongo:UZOJNpqtUdDKjRHawTQJByTFPBUwTKvL@switchback.proxy.rlwy.net:23885",
+                     authSource="admin")
 db = mongodb.safabarbeiros
 
-# Inicialização do banco de dados
-db.users.create_index([('email', 1)], unique=True)
-db.users.create_index([('username', 1)], unique=True)
+try:
+    # Teste de conexão
+    mongodb.admin.command('ping')
+    logging.info("MongoDB conectado com sucesso!")
+    
+    # Inicialização do banco de dados
+    db.users.create_index([('email', 1)], unique=True)
+    db.users.create_index([('username', 1)], unique=True)
+except Exception as e:
+    logging.error(f"Erro ao conectar ao MongoDB: {e}")
 
 # Inicialização do LoginManager
 login_manager = LoginManager()
