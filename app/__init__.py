@@ -9,6 +9,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Inicialização do cliente MongoDB
 mongodb = MongoClient("mongodb://mongo:UZOJNpqtUdDKjRHawTQJByTFPBUwTKvL@switchback.proxy.rlwy.net:23885")
+db = mongodb.get_database()
 
 # Inicialização do LoginManager
 login_manager = LoginManager()

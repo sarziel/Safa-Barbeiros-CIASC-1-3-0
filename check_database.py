@@ -1,34 +1,32 @@
 
-from app import create_app, db
-from app.models.models import User, Cliente, Barbeiro, Admin, Agendamento, HorarioDisponivel, Venda, Permissao, OAuth
-
-app = create_app()
+from app import create_app, mongodb
 
 def check_database():
+    app = create_app()
     with app.app_context():
-        # Verificar conexão
         try:
-            # Listar todas as tabelas
-            print("\n=== Tabelas no banco de dados ===")
-            for table in db.metadata.tables.keys():
-                print(f"- {table}")
+            # Verificar conexão
+            db = mongodb.get_database()
+            collections = db.list_collection_names()
             
-            # Contagem de registros
-            print("\n=== Contagem de registros ===")
-            print(f"Usuários: {User.query.count()}")
-            print(f"Clientes: {Cliente.query.count()}")
-            print(f"Barbeiros: {Barbeiro.query.count()}")
-            print(f"Admins: {Admin.query.count()}")
-            print(f"Agendamentos: {Agendamento.query.count()}")
-            print(f"Horários Disponíveis: {HorarioDisponivel.query.count()}")
-            print(f"Vendas: {Venda.query.count()}")
-            print(f"Permissões: {Permissao.query.count()}")
-            print(f"OAuth: {OAuth.query.count()}")
+            print("\n=== Coleções no MongoDB ===")
+            for collection in collections:
+                print(f"- {collection}")
             
-            print("\nConexão com o banco de dados está funcionando!")
+            # Contagem de documentos
+            print("\n=== Contagem de documentos ===")
+            print(f"Usuários: {db.users.count_documents({})}")
+            print(f"Clientes: {db.clientes.count_documents({})}")
+            print(f"Barbeiros: {db.barbeiros.count_documents({})}")
+            print(f"Admins: {db.admins.count_documents({})}")
+            print(f"Agendamentos: {db.agendamentos.count_documents({})}")
+            print(f"Horários Disponíveis: {db.horarios_disponiveis.count_documents({})}")
+            print(f"Vendas: {db.vendas.count_documents({})}")
+            
+            print("\nConexão com o MongoDB está funcionando!")
             
         except Exception as e:
-            print(f"\nErro ao conectar com o banco de dados: {str(e)}")
+            print(f"\nErro ao conectar com o MongoDB: {str(e)}")
 
 if __name__ == "__main__":
     check_database()
