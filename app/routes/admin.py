@@ -50,7 +50,7 @@ def usuarios():
     
     return render_template('admin/usuarios.html', usuarios=usuarios, tipo_filtro=tipo_filtro)
 
-@admin_bp.route('/usuarios/<int:user_id>/editar', methods=['GET', 'POST'])
+@admin_bp.route('/usuarios/<string:user_id>/editar', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def editar_usuario(user_id):
@@ -96,7 +96,7 @@ def editar_usuario(user_id):
     
     return render_template('admin/editar_usuario.html', usuario=usuario)
 
-@admin_bp.route('/usuarios/<int:user_id>/excluir', methods=['POST'])
+@admin_bp.route('/usuarios/<string:user_id>/excluir', methods=['POST'])
 @login_required
 @admin_required
 def excluir_usuario(user_id):
@@ -129,7 +129,7 @@ def permissoes():
     barbeiros = Barbeiro.query.all()
     return render_template('admin/permissoes.html', barbeiros=barbeiros)
 
-@admin_bp.route('/permissoes/<int:barbeiro_id>/toggle', methods=['POST'])
+@admin_bp.route('/permissoes/<string:barbeiro_id>/toggle', methods=['POST'])
 @login_required
 @admin_required
 def toggle_permissao(barbeiro_id):
