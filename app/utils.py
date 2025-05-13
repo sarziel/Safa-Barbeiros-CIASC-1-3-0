@@ -66,8 +66,5 @@ def get_db():
     return db
 
 
-# Inject template utilities
-def inject_utilities():
-    return {
-        'now': now
-    }
+def inject_now():
+    return {'now': now}
