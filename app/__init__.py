@@ -1,3 +1,4 @@
+
 import os
 import logging
 from flask import Flask
@@ -9,11 +10,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Inicialização do cliente MongoDB
 mongodb = MongoClient("mongodb://mongo:UZOJNpqtUdDKjRHawTQJByTFPBUwTKvL@switchback.proxy.rlwy.net:23885")
-db = mongodb['safabarbeiros']  # Define o nome do banco de dados
-
-# Criar as coleções necessárias se não existirem
-db.users.create_index([('email', 1)], unique=True)
-db.users.create_index([('username', 1)], unique=True)
+db = mongodb['safabarbeiros']
 
 # Inicialização do LoginManager
 login_manager = LoginManager()
@@ -33,14 +30,6 @@ def create_app():
     # Inicialização do login manager
     login_manager.init_app(app)
 
-    # Importação dos modelos
-    from app.models.models import User
-
-    # Função para carregar o usuário para o Flask-Login
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.get(user_id)
-
     # Registro dos blueprints
     from app.routes.auth import auth_bp
     from app.routes.admin import admin_bp
@@ -57,3 +46,8 @@ def create_app():
     app.register_blueprint(replit_auth_bp, url_prefix='/auth')
 
     return app
+
+@login_manager.user_loader
+def load_user(user_id):
+    from app.models.models import User
+    return User.get(user_id)
