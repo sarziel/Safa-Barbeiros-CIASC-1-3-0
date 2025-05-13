@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Inicialização do cliente MongoDB
 mongodb = MongoClient("mongodb://mongo:UZOJNpqtUdDKjRHawTQJByTFPBUwTKvL@switchback.proxy.rlwy.net:23885")
-db = mongodb.get_database()
+db = mongodb['safabarbeiros']  # Define o nome do banco de dados
 
 # Inicialização do LoginManager
 login_manager = LoginManager()
@@ -18,34 +18,19 @@ login_manager.login_message = 'Faça login para acessar esta página'
 login_manager.login_message_category = 'warning'
 
 def create_app():
-    # Criação da instância do Flask
     app = Flask(__name__)
-
-    # Configuração do secret key
     app.secret_key = os.environ.get("SESSION_SECRET", "safabarbeiros-dev-key")
-
-    # Configuração da conexão com o banco de dados
-    # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL",
-    #                                       "mysql://root:YDZtCgcxrhTHrpmpVunCpgdabUEZkKQc@trolley.proxy.rlwy.net:40848/railway")
-    # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    # app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    #     "pool_recycle": 300,
-    #     "pool_pre_ping": True,
-    # }
 
     # Configurações para upload de arquivos
     app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'uploads')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
-
-    # Cria a pasta de uploads se não existir
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-    # Inicialização das extensões
-    # db.init_app(app)
+    # Inicialização do login manager
     login_manager.init_app(app)
 
     # Importação dos modelos
-    from app.models.models import User, Cliente, Barbeiro, Admin
+    from app.models.models import User
 
     # Função para carregar o usuário para o Flask-Login
     @login_manager.user_loader
@@ -66,10 +51,5 @@ def create_app():
     app.register_blueprint(cliente_bp, url_prefix='/cliente')
     app.register_blueprint(common_bp)
     app.register_blueprint(replit_auth_bp, url_prefix='/auth')
-
-    # Criação das tabelas do banco de dados
-    with app.app_context():
-        # db.create_all() # Remove this line as SQLAlchemy is replaced with MongoDB
-        pass
 
     return app

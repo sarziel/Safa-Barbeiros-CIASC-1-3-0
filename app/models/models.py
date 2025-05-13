@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,28 +6,45 @@ from bson import ObjectId
 
 class User(UserMixin):
     def __init__(self, **kwargs):
-        self._id = kwargs.get('_id', str(ObjectId()))
+        self._id = kwargs.get('_id', ObjectId())
         self.id = str(self._id)
         self.nome = kwargs.get('nome')
         self.username = kwargs.get('username')
         self.email = kwargs.get('email')
         self.senha_hash = kwargs.get('senha_hash')
-        self.tipo = kwargs.get('tipo', 'user')
+        self.tipo = kwargs.get('tipo', 'cliente')
         self.foto_perfil = kwargs.get('foto_perfil', 'default.jpg')
         self.data_criacao = kwargs.get('data_criacao', datetime.utcnow())
 
-    def set_password(self, senha):
-        self.senha_hash = generate_password_hash(senha)
-        
-    def check_password(self, senha):
-        return check_password_hash(self.senha_hash, senha)
-    
     @staticmethod
     def get(user_id):
-        user_data = mongodb.db.users.find_one({'_id': ObjectId(user_id)})
-        if not user_data:
-            return None
-        return User(**user_data)
+        from app import db
+        user_data = db.users.find_one({'_id': ObjectId(user_id)})
+        return User(**user_data) if user_data else None
+
+    def save(self):
+        from app import db
+        data = {
+            'nome': self.nome,
+            'username': self.username,
+            'email': self.email,
+            'senha_hash': self.senha_hash,
+            'tipo': self.tipo,
+            'foto_perfil': self.foto_perfil,
+            'data_criacao': self.data_criacao
+        }
+        if hasattr(self, '_id'):
+            db.users.update_one({'_id': self._id}, {'$set': data})
+        else:
+            result = db.users.insert_one(data)
+            self._id = result.inserted_id
+            self.id = str(self._id)
+
+    def set_password(self, senha):
+        self.senha_hash = generate_password_hash(senha)
+
+    def check_password(self, senha):
+        return check_password_hash(self.senha_hash, senha)
 
 class Cliente(User):
     def __init__(self, **kwargs):
