@@ -98,10 +98,29 @@ def register():
                 foto_perfil = save_picture(file)
         
         # Criação do usuário
+        # Gerar um ID único para o usuário
+        import uuid
+        usuario_id = str(uuid.uuid4())
+        
         if tipo == 'cliente':
-            novo_usuario = Cliente(nome=nome, username=username, email=email, numero_aluno=numero_aluno, foto_perfil=foto_perfil)
+            novo_usuario = Cliente(
+                id=usuario_id,
+                nome=nome, 
+                username=username, 
+                email=email, 
+                numero_aluno=numero_aluno, 
+                foto_perfil=foto_perfil
+            )
         else:  # tipo == 'barbeiro'
-            novo_usuario = Barbeiro(nome=nome, username=username, email=email, numero_aluno=numero_aluno, foto_perfil=foto_perfil, ativo=False)
+            novo_usuario = Barbeiro(
+                id=usuario_id,
+                nome=nome, 
+                username=username, 
+                email=email, 
+                numero_aluno=numero_aluno, 
+                foto_perfil=foto_perfil, 
+                ativo=False
+            )
         
         novo_usuario.set_password(senha)
         

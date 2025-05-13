@@ -81,65 +81,18 @@
     </div>
 </div>
 
-<!-- Segunda linha de cards -->
-<div class="row">
-    <!-- Vendas hoje -->
-    <div class="col-md-4 mb-4">
-        <div class="card dashboard-card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-4 text-center">
-                        <i class="fas fa-cash-register dashboard-card-icon"></i>
-                    </div>
-                    <div class="col-8">
-                        <div class="dashboard-card-value">{{ vendas_hoje }}</div>
-                        <div class="dashboard-card-title">Vendas Hoje</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Valor vendas hoje -->
-    <div class="col-md-8 mb-4">
-        <div class="card dashboard-card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-3 text-center">
-                        <i class="fas fa-money-bill-wave dashboard-card-icon"></i>
-                    </div>
-                    <div class="col-9">
-                        <div class="dashboard-card-value">R$ {{ "%.2f"|format(valor_vendas_hoje) }}</div>
-                        <div class="dashboard-card-title">Valor Total de Vendas Hoje</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Gráficos e tabelas -->
 <div class="row">
     <!-- Gráfico de agendamentos por dia da semana -->
-    <div class="col-md-6 mb-4">
+    <div class="col-md-12 mb-4">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Agendamentos por Dia da Semana</h5>
             </div>
             <div class="card-body">
                 <canvas id="agendamentosChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Gráfico de vendas por barbeiro -->
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Vendas por Barbeiro (Últimos 30 dias)</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="vendasChart" height="300"></canvas>
             </div>
         </div>
     </div>
@@ -238,18 +191,6 @@
             labels: diasSemana,
             values: valoresAgendamentos
         });
-        
-        // Dados para o gráfico de vendas por barbeiro
-        const dadosVendas = [
-            { barbeiro: 'João Silva', valor: 1200.50 },
-            { barbeiro: 'Carlos Oliveira', valor: 980.00 },
-            { barbeiro: 'Pedro Santos', valor: 1450.75 },
-            { barbeiro: 'André Martins', valor: 850.25 },
-            { barbeiro: 'Lucas Pereira', valor: 1100.00 }
-        ];
-        
-        // Criar gráfico de vendas
-        createAdminVendasChart('vendasChart', dadosVendas);
     });
 </script>
 {% endblock %}

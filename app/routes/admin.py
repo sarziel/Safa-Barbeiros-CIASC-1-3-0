@@ -23,16 +23,6 @@ def dashboard():
         Agendamento.data_hora <= datetime.today().replace(hour=23, minute=59, second=59)
     ).count()
     
-    vendas_hoje = Venda.query.filter(
-        Venda.data >= datetime.today().replace(hour=0, minute=0, second=0),
-        Venda.data <= datetime.today().replace(hour=23, minute=59, second=59)
-    ).count()
-    
-    valor_vendas_hoje = db.session.query(db.func.sum(Venda.valor)).filter(
-        Venda.data >= datetime.today().replace(hour=0, minute=0, second=0),
-        Venda.data <= datetime.today().replace(hour=23, minute=59, second=59)
-    ).scalar() or 0
-    
     # Lista dos últimos agendamentos
     ultimos_agendamentos = Agendamento.query.order_by(Agendamento.data_criacao.desc()).limit(5).all()
     
@@ -41,8 +31,6 @@ def dashboard():
                           total_barbeiros=total_barbeiros,
                           barbeiros_ativos=barbeiros_ativos,
                           agendamentos_hoje=agendamentos_hoje,
-                          vendas_hoje=vendas_hoje,
-                          valor_vendas_hoje=valor_vendas_hoje,
                           ultimos_agendamentos=ultimos_agendamentos)
 
 @admin_bp.route('/usuarios')
