@@ -9,7 +9,7 @@ deploymentTarget = "autoscale"
 run = ["sh", "-c", "gunicorn --workers 4 --bind 0.0.0.0:5000 'app:create_app()'"]
 
 [workflows]
-runButton = "Project"
+runButton = "Start Application"
 
 [[workflows.workflow]]
 name = "Project"
@@ -37,6 +37,15 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python check_database.py"
+
+[[workflows.workflow]]
+name = "Start Application"
+author = 42641848
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
 
 [[ports]]
 localPort = 5000

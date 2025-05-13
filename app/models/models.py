@@ -1,137 +1,205 @@
+
 from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db
+from app import mongodb
+from bson import ObjectId
 
-# Definição da tabela de usuários
-class User(UserMixin, db.Model):
-    __tablename__ = 'users'
-    
-    id = db.Column(db.String(36), primary_key=True)
-    nome = db.Column(db.String(100), nullable=False)
-    username = db.Column(db.String(64), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=True)  # Email pode ser nulo para alguns métodos de login
-    senha_hash = db.Column(db.String(256), nullable=False)
-    tipo = db.Column(db.String(20), nullable=False)
-    foto_perfil = db.Column(db.String(255), default='default.jpg')
-    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    __mapper_args__ = {
-        'polymorphic_on': tipo,
-        'polymorphic_identity': 'user'
-    }
-    
+class User(UserMixin):
+    def __init__(self, **kwargs):
+        self._id = kwargs.get('_id', str(ObjectId()))
+        self.id = str(self._id)
+        self.nome = kwargs.get('nome')
+        self.username = kwargs.get('username')
+        self.email = kwargs.get('email')
+        self.senha_hash = kwargs.get('senha_hash')
+        self.tipo = kwargs.get('tipo', 'user')
+        self.foto_perfil = kwargs.get('foto_perfil', 'default.jpg')
+        self.data_criacao = kwargs.get('data_criacao', datetime.utcnow())
+
     def set_password(self, senha):
         self.senha_hash = generate_password_hash(senha)
         
     def check_password(self, senha):
         return check_password_hash(self.senha_hash, senha)
+    
+    @staticmethod
+    def get(user_id):
+        user_data = mongodb.db.users.find_one({'_id': ObjectId(user_id)})
+        if not user_data:
+            return None
+        return User(**user_data)
 
-# Modelo para Cliente
 class Cliente(User):
-    __tablename__ = 'clientes'
-    
-    id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
-    numero_aluno = db.Column(db.String(4), nullable=True)
-    
-    # Relacionamentos
-    agendamentos = db.relationship('Agendamento', backref='cliente', lazy='dynamic')
-    vendas = db.relationship('Venda', backref='cliente', lazy='dynamic')
-    
-    __mapper_args__ = {
-        'polymorphic_identity': 'cliente'
-    }
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.numero_aluno = kwargs.get('numero_aluno')
+        self.tipo = 'cliente'
 
-# Modelo para Barbeiro
+    def save(self):
+        data = {
+            'nome': self.nome,
+            'username': self.username,
+            'email': self.email,
+            'senha_hash': self.senha_hash,
+            'tipo': self.tipo,
+            'foto_perfil': self.foto_perfil,
+            'data_criacao': self.data_criacao,
+            'numero_aluno': self.numero_aluno
+        }
+        if hasattr(self, '_id'):
+            mongodb.db.users.update_one({'_id': ObjectId(self._id)}, {'$set': data})
+        else:
+            result = mongodb.db.users.insert_one(data)
+            self._id = result.inserted_id
+            self.id = str(self._id)
+
 class Barbeiro(User):
-    __tablename__ = 'barbeiros'
-    
-    id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
-    numero_aluno = db.Column(db.String(4), nullable=True)
-    ativo = db.Column(db.Boolean, default=False)
-    
-    # Relacionamentos
-    horarios_disponiveis = db.relationship('HorarioDisponivel', backref='barbeiro', lazy='dynamic')
-    agendamentos = db.relationship('Agendamento', backref='barbeiro', lazy='dynamic')
-    vendas = db.relationship('Venda', backref='barbeiro', lazy='dynamic')
-    permissao = db.relationship('Permissao', backref='barbeiro', uselist=False)
-    
-    __mapper_args__ = {
-        'polymorphic_identity': 'barbeiro'
-    }
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.numero_aluno = kwargs.get('numero_aluno')
+        self.ativo = kwargs.get('ativo', False)
+        self.tipo = 'barbeiro'
 
-# Modelo para Administrador
+    def save(self):
+        data = {
+            'nome': self.nome,
+            'username': self.username,
+            'email': self.email,
+            'senha_hash': self.senha_hash,
+            'tipo': self.tipo,
+            'foto_perfil': self.foto_perfil,
+            'data_criacao': self.data_criacao,
+            'numero_aluno': self.numero_aluno,
+            'ativo': self.ativo
+        }
+        if hasattr(self, '_id'):
+            mongodb.db.users.update_one({'_id': ObjectId(self._id)}, {'$set': data})
+        else:
+            result = mongodb.db.users.insert_one(data)
+            self._id = result.inserted_id
+            self.id = str(self._id)
+
 class Admin(User):
-    __tablename__ = 'admins'
-    
-    id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
-    
-    __mapper_args__ = {
-        'polymorphic_identity': 'admin'
-    }
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.tipo = 'admin'
 
-# Modelo para Agendamentos
-class Agendamento(db.Model):
-    __tablename__ = 'agendamentos'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    cliente_id = db.Column(db.String, db.ForeignKey('clientes.id'), nullable=False)
-    barbeiro_id = db.Column(db.String, db.ForeignKey('barbeiros.id'), nullable=False)
-    data_hora = db.Column(db.DateTime, nullable=False)
-    status = db.Column(db.String(20), default='agendado')  # agendado, concluido, cancelado
-    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+    def save(self):
+        data = {
+            'nome': self.nome,
+            'username': self.username,
+            'email': self.email,
+            'senha_hash': self.senha_hash,
+            'tipo': self.tipo,
+            'foto_perfil': self.foto_perfil,
+            'data_criacao': self.data_criacao
+        }
+        if hasattr(self, '_id'):
+            mongodb.db.users.update_one({'_id': ObjectId(self._id)}, {'$set': data})
+        else:
+            result = mongodb.db.users.insert_one(data)
+            self._id = result.inserted_id
+            self.id = str(self._id)
 
-# Modelo para Horários Disponíveis
-class HorarioDisponivel(db.Model):
-    __tablename__ = 'horarios_disponiveis'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    barbeiro_id = db.Column(db.String, db.ForeignKey('barbeiros.id'), nullable=False)
-    dia_semana = db.Column(db.Integer, nullable=False)  # 0-6 (Segunda a Domingo)
-    hora_inicio = db.Column(db.Time, nullable=False)
-    hora_fim = db.Column(db.Time, nullable=False)
-    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+class Agendamento:
+    def __init__(self, **kwargs):
+        self._id = kwargs.get('_id', ObjectId())
+        self.id = str(self._id)
+        self.cliente_id = kwargs.get('cliente_id')
+        self.barbeiro_id = kwargs.get('barbeiro_id')
+        self.data_hora = kwargs.get('data_hora')
+        self.status = kwargs.get('status', 'agendado')
+        self.data_criacao = kwargs.get('data_criacao', datetime.utcnow())
 
-# Modelo para Vendas
-class Venda(db.Model):
-    __tablename__ = 'vendas'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    barbeiro_id = db.Column(db.String, db.ForeignKey('barbeiros.id'), nullable=False)
-    cliente_id = db.Column(db.String, db.ForeignKey('clientes.id'), nullable=True)  # Nullable para venda fiada
-    valor = db.Column(db.Float, nullable=False)
-    data = db.Column(db.DateTime, default=datetime.utcnow)
-    descricao = db.Column(db.String(255), nullable=False)
-    tipo = db.Column(db.String(20), default='normal')  # normal, fiada
-    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+    def save(self):
+        data = {
+            'cliente_id': self.cliente_id,
+            'barbeiro_id': self.barbeiro_id,
+            'data_hora': self.data_hora,
+            'status': self.status,
+            'data_criacao': self.data_criacao
+        }
+        if hasattr(self, '_id'):
+            mongodb.db.agendamentos.update_one({'_id': self._id}, {'$set': data})
+        else:
+            result = mongodb.db.agendamentos.insert_one(data)
+            self._id = result.inserted_id
+            self.id = str(self._id)
 
-# Modelo para Permissões
-class Permissao(db.Model):
-    __tablename__ = 'permissoes'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    barbeiro_id = db.Column(db.String, db.ForeignKey('barbeiros.id'), nullable=False)
-    ativo = db.Column(db.Boolean, default=False)
-    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
-    data_modificacao = db.Column(db.DateTime, onupdate=datetime.utcnow)
+class HorarioDisponivel:
+    def __init__(self, **kwargs):
+        self._id = kwargs.get('_id', ObjectId())
+        self.id = str(self._id)
+        self.barbeiro_id = kwargs.get('barbeiro_id')
+        self.dia_semana = kwargs.get('dia_semana')
+        self.hora_inicio = kwargs.get('hora_inicio')
+        self.hora_fim = kwargs.get('hora_fim')
+        self.data_criacao = kwargs.get('data_criacao', datetime.utcnow())
 
-# Modelo para OAuth (Replit Auth)
-class OAuth(db.Model):
-    __tablename__ = 'oauth'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String, db.ForeignKey('users.id'))
-    browser_session_key = db.Column(db.String(255), nullable=False)
-    provider = db.Column(db.String(50), nullable=False)
-    token = db.Column(db.JSON, nullable=False)
-    
-    user = db.relationship(User)
-    
-    __table_args__ = (
-        db.UniqueConstraint(
-            'user_id',
-            'browser_session_key',
-            'provider',
-            name='uq_user_browser_session_key_provider',
-        ),
-    )
+    def save(self):
+        data = {
+            'barbeiro_id': self.barbeiro_id,
+            'dia_semana': self.dia_semana,
+            'hora_inicio': self.hora_inicio,
+            'hora_fim': self.hora_fim,
+            'data_criacao': self.data_criacao
+        }
+        if hasattr(self, '_id'):
+            mongodb.db.horarios_disponiveis.update_one({'_id': self._id}, {'$set': data})
+        else:
+            result = mongodb.db.horarios_disponiveis.insert_one(data)
+            self._id = result.inserted_id
+            self.id = str(self._id)
+
+class Venda:
+    def __init__(self, **kwargs):
+        self._id = kwargs.get('_id', ObjectId())
+        self.id = str(self._id)
+        self.barbeiro_id = kwargs.get('barbeiro_id')
+        self.cliente_id = kwargs.get('cliente_id')
+        self.valor = kwargs.get('valor')
+        self.data = kwargs.get('data', datetime.utcnow())
+        self.descricao = kwargs.get('descricao')
+        self.tipo = kwargs.get('tipo', 'normal')
+        self.data_criacao = kwargs.get('data_criacao', datetime.utcnow())
+
+    def save(self):
+        data = {
+            'barbeiro_id': self.barbeiro_id,
+            'cliente_id': self.cliente_id,
+            'valor': self.valor,
+            'data': self.data,
+            'descricao': self.descricao,
+            'tipo': self.tipo,
+            'data_criacao': self.data_criacao
+        }
+        if hasattr(self, '_id'):
+            mongodb.db.vendas.update_one({'_id': self._id}, {'$set': data})
+        else:
+            result = mongodb.db.vendas.insert_one(data)
+            self._id = result.inserted_id
+            self.id = str(self._id)
+
+class Permissao:
+    def __init__(self, **kwargs):
+        self._id = kwargs.get('_id', ObjectId())
+        self.id = str(self._id)
+        self.barbeiro_id = kwargs.get('barbeiro_id')
+        self.ativo = kwargs.get('ativo', False)
+        self.data_criacao = kwargs.get('data_criacao', datetime.utcnow())
+        self.data_modificacao = kwargs.get('data_modificacao')
+
+    def save(self):
+        data = {
+            'barbeiro_id': self.barbeiro_id,
+            'ativo': self.ativo,
+            'data_criacao': self.data_criacao,
+            'data_modificacao': datetime.utcnow()
+        }
+        if hasattr(self, '_id'):
+            mongodb.db.permissoes.update_one({'_id': self._id}, {'$set': data})
+        else:
+            result = mongodb.db.permissoes.insert_one(data)
+            self._id = result.inserted_id
+            self.id = str(self._id)

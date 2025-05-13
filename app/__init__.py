@@ -49,7 +49,7 @@ def create_app():
     # Função para carregar o usuário para o Flask-Login
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(user_id)
+        return User.get(user_id)
 
     # Registro dos blueprints
     from app.routes.auth import auth_bp
