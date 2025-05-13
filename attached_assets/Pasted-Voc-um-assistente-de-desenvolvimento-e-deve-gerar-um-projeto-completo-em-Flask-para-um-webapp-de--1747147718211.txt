@@ -1,0 +1,71 @@
+Você é um assistente de desenvolvimento e deve gerar um projeto completo em Flask para um webapp de barbearia chamado **Safa Barbeiros CIASC**, criado pela **UnBug Solutions TI**.
+
+Crie toda a estrutura inicial do projeto (backend e frontend), nativa em **português**, com as seguintes especificações:
+
+🛠️ **Configuração do Projeto**
+- Use `venv` ou `virtualenv`
+- Estrutura de pastas:
+  - `app/`
+  - `app/models/`
+  - `app/routes/`
+  - `app/templates/`
+  - `app/static/`
+  - `config.py`
+  - `run.py`
+
+📦 **Banco de Dados (MySQL)**
+- Use Flask-SQLAlchemy
+- URL de conexão:  
+  `mysql://root:YDZtCgcxrhTHrpmpVunCpgdabUEZkKQc@trolley.proxy.rlwy.net:40848/railway`
+
+🔐 **Sistema de Login**
+- Login com **usuário** e **senha** 
+- Autenticação com Flask-Login
+- Três tipos de usuários:
+  - **Cliente**
+  - **Barbeiro**
+  - **Administrador**
+- Upload de **foto de perfil** para cada tipo de usuário
+
+🧠 **Modelos (ORM)**
+- `User`: id, nome, email, senha_hash, tipo, foto_perfil
+- `Cliente`: herda User,número_aluno (4 dígitos) 
+- `Barbeiro`: herda User, número_aluno (4 dígitos), ativo (bool), área financeira, horários disponíveis
+- `Admin`: herda User
+- `Agendamento`: id, cliente_id, barbeiro_id, data_hora, status
+- `HorarioDisponivel`: id, barbeiro_id, dia_semana, hora_inicio, hora_fim
+- `Venda`: id, barbeiro_id, cliente_id (nullable para venda fiada), valor, data, descricao
+- `Permissão`: id, barbeiro_id, ativo (bool)
+
+📊 **Dashboards**
+- **Barbeiro**:
+  - Dashboard financeiro
+  - Cadastro de horários
+  - PDV com controle de vendas e venda fiada
+- **Cliente**:
+  - Dashboard com lista de barbeiros ativos
+  - Ao clicar no barbeiro, exibir horários disponíveis
+- **Administrador**:
+  - Dashboard para editar usuários, trocar senhas, ativar/desativar barbeiros
+  - Página de permissões (o admin seleciona qual barbeiro esta ativo na plataforma, dos que estao cadastrados) 
+
+🎨 **Frontend com Jinja2 + Bootstrap**
+- Layout com navbar dinâmica conforme tipo de usuário
+- Páginas de login, registro, dashboards, agendamentos e vendas
+- Upload de imagem com preview e salvamento em `static/uploads`
+
+📈 **Funcionalidades** 
+- Gráficos simples (ex: Chart.js ou Plotly) no dashboard
+- Paginação para vendas e agendamentos
+- API REST básica para futuras integrações mobile
+- Flash messages para feedback ao usuário
+- Proteção de rotas com `@login_required` e controle por tipo de usuário
+
+🗂️ **Saída esperada**
+- Estrutura inicial completa com arquivos e código funcional
+- Comentários em português explicando as funções principais
+- Base de dados compatível com MySQL fornecido
+
+Gere o projeto pronto para rodar em ambiente local (com `run.py`) e utilizável para deploy posterior.
+
+cores tema, camuflado dos fuzileiros brasileiros, fundo claro e letra escura. 
