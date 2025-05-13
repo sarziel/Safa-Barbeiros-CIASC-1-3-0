@@ -1,6 +1,35 @@
 from datetime import datetime
-from bson import ObjectId
+from werkzeug.security import generate_password_hash, check_password_hash
+from bson.objectid import ObjectId
+from app import db
+
+class OAuth:
+    def __init__(self, user_id, browser_session_key, provider, token):
+        self._id = ObjectId()
+        self.user_id = user_id
+        self.browser_session_key = browser_session_key
+        self.provider = provider
+        self.token = token
+
+    def save(self):
+        oauth_data = {
+            '_id': self._id,
+            'user_id': self.user_id,
+            'browser_session_key': self.browser_session_key,
+            'provider': self.provider,
+            'token': self.token
+        }
+        db.oauth.insert_one(oauth_data)
+
+    @staticmethod
+    def get(oauth_id):
+        oauth_data = db.oauth.find_one({'_id': ObjectId(oauth_id)})
+        if oauth_data:
+            return OAuth(**oauth_data)
+        return None
+
 from flask_login import UserMixin
+from bson import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(UserMixin):
