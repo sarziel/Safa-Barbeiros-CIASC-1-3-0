@@ -25,13 +25,13 @@ def login():
         return redirect(url_for('auth.index'))
         
     if request.method == 'POST':
-        email = request.form.get('email')
+        username = request.form.get('username')
         senha = request.form.get('senha')
         
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(username=username).first()
         
         if user is None or not user.check_password(senha):
-            flash('Email ou senha incorretos. Tente novamente.', 'danger')
+            flash('Nome de usuário ou senha incorretos. Tente novamente.', 'danger')
             return redirect(url_for('auth.login'))
             
         # Verifica se o barbeiro está ativo
@@ -66,6 +66,7 @@ def register():
         
     if request.method == 'POST':
         nome = request.form.get('nome')
+        username = request.form.get('username')
         email = request.form.get('email')
         senha = request.form.get('senha')
         senha_confirmacao = request.form.get('senha_confirmacao')
@@ -75,6 +76,10 @@ def register():
         # Validações
         if senha != senha_confirmacao:
             flash('As senhas não correspondem!', 'danger')
+            return redirect(url_for('auth.register'))
+            
+        if User.query.filter_by(username=username).first():
+            flash('Este nome de usuário já está em uso. Escolha outro.', 'danger')
             return redirect(url_for('auth.register'))
             
         if User.query.filter_by(email=email).first():
@@ -94,9 +99,9 @@ def register():
         
         # Criação do usuário
         if tipo == 'cliente':
-            novo_usuario = Cliente(nome=nome, email=email, numero_aluno=numero_aluno, foto_perfil=foto_perfil)
+            novo_usuario = Cliente(nome=nome, username=username, email=email, numero_aluno=numero_aluno, foto_perfil=foto_perfil)
         else:  # tipo == 'barbeiro'
-            novo_usuario = Barbeiro(nome=nome, email=email, numero_aluno=numero_aluno, foto_perfil=foto_perfil, ativo=False)
+            novo_usuario = Barbeiro(nome=nome, username=username, email=email, numero_aluno=numero_aluno, foto_perfil=foto_perfil, ativo=False)
         
         novo_usuario.set_password(senha)
         

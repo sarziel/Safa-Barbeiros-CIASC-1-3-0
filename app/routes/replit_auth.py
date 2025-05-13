@@ -121,9 +121,14 @@ def save_user(user_claims):
     # Cria um novo usuário como cliente por padrão
     from werkzeug.security import generate_password_hash
     import secrets
+    import uuid
+    
+    # Gera um nome de usuário único baseado no ID do Replit ou nome de usuário
+    nome_usuario = f"{user_claims.get('first_name', 'user')}{uuid.uuid4().hex[:6]}".lower()
     
     novo_usuario = Cliente(
         id=user_claims['sub'],
+        username=nome_usuario,
         email=user_claims.get('email'),
         nome=f"{user_claims.get('first_name', '')} {user_claims.get('last_name', '')}".strip() or "Usuário Replit",
         foto_perfil=user_claims.get('profile_image_url', 'default.jpg'),
