@@ -61,6 +61,10 @@ def create_app():
     app.register_blueprint(common_bp)
     app.register_blueprint(replit_auth_bp, url_prefix='/auth')
 
+    # Register template utilities
+    from app.utils import inject_utilities
+    app.context_processor(inject_utilities)
+
     return app
 
 @login_manager.user_loader

@@ -1,9 +1,12 @@
 import os
+from datetime import datetime
 import uuid
 from functools import wraps
+
 from flask import flash, redirect, url_for, current_app
 from flask_login import current_user
 from werkzeug.utils import secure_filename
+
 
 # Decorador para verificar se o usuário é administrador
 def admin_required(f):
@@ -15,6 +18,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 # Decorador para verificar se o usuário é barbeiro
 def barbeiro_required(f):
     @wraps(f)
@@ -24,6 +28,7 @@ def barbeiro_required(f):
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated_function
+
 
 # Decorador para verificar se o usuário é cliente
 def cliente_required(f):
@@ -35,48 +40,34 @@ def cliente_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 # Função para verificar se a extensão do arquivo é permitida
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
 def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 # Função para salvar imagem de perfil
-def save_picture(file):
-    """
-    Salva a imagem de perfil do usuário e retorna o nome do arquivo.
-    
-    Args:
-        file: Arquivo de imagem enviado pelo usuário
-    
-    Returns:
-        str: Nome único do arquivo salvo
-    """
-    # Gera um nome de arquivo único para evitar conflitos
-    random_hex = uuid.uuid4().hex
-    _, file_ext = os.path.splitext(secure_filename(file.filename))
-    picture_filename = random_hex + file_ext
-    
-    # Define o caminho para salvar o arquivo
-    picture_path = os.path.join(current_app.config['UPLOAD_FOLDER'], picture_filename)
-    
-    # Salva o arquivo
-    file.save(picture_path)
-    
-    return picture_filename
+def save_picture(picture_file):
+    from flask import current_app
+    filename = secure_filename(picture_file.filename)
+    picture_file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+    return filename
 
-from datetime import datetime
-from flask import current_app
 
+# Funções de utilidade para templates
 def now():
-    """Returns current datetime for templates"""
     return datetime.now()
 
+
 def get_db():
-    """Get database connection"""
     from app import db
     return db
 
-def inject_now():
-    """Inject now function into templates"""
-    return dict(now=now)
+
+# Inject template utilities
+def inject_utilities():
+    return {
+        'now': now
+    }
