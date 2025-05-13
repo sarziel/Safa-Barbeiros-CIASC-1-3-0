@@ -28,16 +28,23 @@ def login():
         username = request.form.get('username')
         senha = request.form.get('senha')
         
-        user = User.query.filter_by(username=username).first()
+        from app import db
+        user_data = db.users.find_one({'username': username})
         
-        if user is None or not user.check_password(senha):
+        if not user_data:
+            flash('Nome de usuário ou senha incorretos. Tente novamente.', 'danger')
+            return redirect(url_for('auth.login'))
+            
+        user = User(**user_data)
+        
+        if not user.check_password(senha):
             flash('Nome de usuário ou senha incorretos. Tente novamente.', 'danger')
             return redirect(url_for('auth.login'))
             
         # Verifica se o barbeiro está ativo
         if user.tipo == 'barbeiro':
-            barbeiro = Barbeiro.query.get(user.id)
-            if not barbeiro.ativo:
+            barbeiro_data = db.users.find_one({'_id': user._id, 'tipo': 'barbeiro'})
+            if not barbeiro_data.get('ativo', False):
                 flash('Sua conta está inativa. Entre em contato com o administrador.', 'warning')
                 return redirect(url_for('auth.login'))
         
