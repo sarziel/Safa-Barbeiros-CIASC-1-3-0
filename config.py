@@ -32,14 +32,16 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     """Configuração para ambiente de produção"""
     DEBUG = False
+    TESTING = False
     
     # Em produção, garantir que o SECRET_KEY esteja definido no ambiente
     SECRET_KEY = os.environ.get('SESSION_SECRET')
     
     # Configuração de segurança adicional
-    # Habilitar para HTTPS em produção
-    # SESSION_COOKIE_SECURE = True
-    # REMEMBER_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    PERMANENT_SESSION_LIFETIME = 3600  # 1 hora
 
 # Dicionário com as configurações disponíveis
 config = {
