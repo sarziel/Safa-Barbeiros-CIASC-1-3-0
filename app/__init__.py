@@ -62,12 +62,14 @@ def create_app():
     from app.routes.barbeiro import barbeiro_bp
     from app.routes.cliente import cliente_bp
     from app.routes.common import common_bp
+    from app.routes.replit_auth import replit_auth_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(barbeiro_bp, url_prefix='/barbeiro')
     app.register_blueprint(cliente_bp, url_prefix='/cliente')
     app.register_blueprint(common_bp)
+    app.register_blueprint(replit_auth_bp, url_prefix='/auth')
     
     # Criação das tabelas do banco de dados
     with app.app_context():

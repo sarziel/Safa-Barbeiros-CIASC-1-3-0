@@ -30,7 +30,7 @@ class User(UserMixin, db.Model):
 class Cliente(User):
     __tablename__ = 'clientes'
     
-    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
     numero_aluno = db.Column(db.String(4), nullable=True)
     
     # Relacionamentos
@@ -45,7 +45,7 @@ class Cliente(User):
 class Barbeiro(User):
     __tablename__ = 'barbeiros'
     
-    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
     numero_aluno = db.Column(db.String(4), nullable=True)
     ativo = db.Column(db.Boolean, default=False)
     
@@ -63,7 +63,7 @@ class Barbeiro(User):
 class Admin(User):
     __tablename__ = 'admins'
     
-    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    id = db.Column(db.String, db.ForeignKey('users.id'), primary_key=True)
     
     __mapper_args__ = {
         'polymorphic_identity': 'admin'
@@ -74,8 +74,8 @@ class Agendamento(db.Model):
     __tablename__ = 'agendamentos'
     
     id = db.Column(db.Integer, primary_key=True)
-    cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=False)
-    barbeiro_id = db.Column(db.Integer, db.ForeignKey('barbeiros.id'), nullable=False)
+    cliente_id = db.Column(db.String, db.ForeignKey('clientes.id'), nullable=False)
+    barbeiro_id = db.Column(db.String, db.ForeignKey('barbeiros.id'), nullable=False)
     data_hora = db.Column(db.DateTime, nullable=False)
     status = db.Column(db.String(20), default='agendado')  # agendado, concluido, cancelado
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
@@ -85,7 +85,7 @@ class HorarioDisponivel(db.Model):
     __tablename__ = 'horarios_disponiveis'
     
     id = db.Column(db.Integer, primary_key=True)
-    barbeiro_id = db.Column(db.Integer, db.ForeignKey('barbeiros.id'), nullable=False)
+    barbeiro_id = db.Column(db.String, db.ForeignKey('barbeiros.id'), nullable=False)
     dia_semana = db.Column(db.Integer, nullable=False)  # 0-6 (Segunda a Domingo)
     hora_inicio = db.Column(db.Time, nullable=False)
     hora_fim = db.Column(db.Time, nullable=False)
@@ -96,8 +96,8 @@ class Venda(db.Model):
     __tablename__ = 'vendas'
     
     id = db.Column(db.Integer, primary_key=True)
-    barbeiro_id = db.Column(db.Integer, db.ForeignKey('barbeiros.id'), nullable=False)
-    cliente_id = db.Column(db.Integer, db.ForeignKey('clientes.id'), nullable=True)  # Nullable para venda fiada
+    barbeiro_id = db.Column(db.String, db.ForeignKey('barbeiros.id'), nullable=False)
+    cliente_id = db.Column(db.String, db.ForeignKey('clientes.id'), nullable=True)  # Nullable para venda fiada
     valor = db.Column(db.Float, nullable=False)
     data = db.Column(db.DateTime, default=datetime.utcnow)
     descricao = db.Column(db.String(255), nullable=False)
@@ -109,7 +109,28 @@ class Permissao(db.Model):
     __tablename__ = 'permissoes'
     
     id = db.Column(db.Integer, primary_key=True)
-    barbeiro_id = db.Column(db.Integer, db.ForeignKey('barbeiros.id'), nullable=False)
+    barbeiro_id = db.Column(db.String, db.ForeignKey('barbeiros.id'), nullable=False)
     ativo = db.Column(db.Boolean, default=False)
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
     data_modificacao = db.Column(db.DateTime, onupdate=datetime.utcnow)
+
+# Modelo para OAuth (Replit Auth)
+class OAuth(db.Model):
+    __tablename__ = 'oauth'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String, db.ForeignKey('users.id'))
+    browser_session_key = db.Column(db.String(255), nullable=False)
+    provider = db.Column(db.String(50), nullable=False)
+    token = db.Column(db.JSON, nullable=False)
+    
+    user = db.relationship(User)
+    
+    __table_args__ = (
+        db.UniqueConstraint(
+            'user_id',
+            'browser_session_key',
+            'provider',
+            name='uq_user_browser_session_key_provider',
+        ),
+    )
