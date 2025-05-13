@@ -35,8 +35,8 @@ def create_app():
     app.secret_key = os.environ.get("SESSION_SECRET", "safabarbeiros-dev-key")
     
     # Register template utility functions
-    from app.utils import inject_now
-    app.context_processor(inject_now)
+    from app.utils import inject_utilities
+    app.context_processor(inject_utilities)
 
     # Configurações para upload de arquivos
     app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'uploads')

@@ -66,5 +66,5 @@ def get_db():
     return db
 
 
-def inject_now():
+def inject_utilities():
     return {'now': now}
