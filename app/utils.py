@@ -79,3 +79,8 @@ def now():
 # Adicione a função now ao contexto global do Jinja
 def inject_now():
     return {'now': now}
+def get_db():
+    from flask import current_app
+    if not hasattr(mongodb, 'db'):
+        mongodb.db = mongodb.get_database()
+    return mongodb.db

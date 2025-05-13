@@ -7,13 +7,8 @@ class Config:
     DEBUG = False
     TESTING = False
     
-    # Configuração do SQLAlchemy
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'mysql://root:YDZtCgcxrhTHrpmpVunCpgdabUEZkKQc@trolley.proxy.rlwy.net:40848/railway')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        "pool_recycle": 300,
-        "pool_pre_ping": True,
-    }
+    # Configuração do MongoDB
+    MONGODB_URI = os.environ.get('DATABASE_URL', 'mongodb://mongo:UZOJNpqtUdDKjRHawTQJByTFPBUwTKvL@switchback.proxy.rlwy.net:23885')
     
     # Configuração para upload de arquivos
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max

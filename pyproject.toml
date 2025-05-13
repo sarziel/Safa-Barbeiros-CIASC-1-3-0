@@ -22,4 +22,5 @@ dependencies = [
     "oauthlib>=3.2.2",
     "pyjwt>=2.10.1",
     "sqlalchemy>=2.0.40",
+    "pymongo>=4.12.1",
 ]
