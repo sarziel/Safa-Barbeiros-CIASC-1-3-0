@@ -25,7 +25,7 @@ def dashboard():
                           barbeiros=barbeiros_ativos,
                           agendamentos=agendamentos_futuros)
 
-@cliente_bp.route('/barbeiros/<int:barbeiro_id>/horarios')
+@cliente_bp.route('/barbeiros/<string:barbeiro_id>/horarios')
 @login_required
 @cliente_required
 def horarios_barbeiro(barbeiro_id):
@@ -93,7 +93,7 @@ def horarios_barbeiro(barbeiro_id):
 @login_required
 @cliente_required
 def agendar():
-    barbeiro_id = request.form.get('barbeiro_id', type=int)
+    barbeiro_id = request.form.get('barbeiro_id')
     data_hora_str = request.form.get('data_hora')
     
     # Validações
@@ -187,7 +187,7 @@ def agendamentos():
                           agendamentos=agendamentos_paginados,
                           status_filtro=status_filtro)
 
-@cliente_bp.route('/agendamentos/<int:agendamento_id>/cancelar', methods=['POST'])
+@cliente_bp.route('/agendamentos/<string:agendamento_id>/cancelar', methods=['POST'])
 @login_required
 @cliente_required
 def cancelar_agendamento(agendamento_id):

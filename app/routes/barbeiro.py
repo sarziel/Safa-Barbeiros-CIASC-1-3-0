@@ -157,7 +157,7 @@ def horarios():
                           horarios=horarios_barbeiro,
                           dias_semana=dias_semana)
 
-@barbeiro_bp.route('/horarios/<int:horario_id>/excluir', methods=['POST'])
+@barbeiro_bp.route('/horarios/<string:horario_id>/excluir', methods=['POST'])
 @login_required
 @barbeiro_required
 def excluir_horario(horario_id):
@@ -202,7 +202,7 @@ def vendas():
         valor = request.form.get('valor', type=float)
         descricao = request.form.get('descricao')
         tipo = request.form.get('tipo', 'normal')
-        cliente_id = request.form.get('cliente_id', type=int)
+        cliente_id = request.form.get('cliente_id')
         
         # Validações
         if not valor or valor <= 0:
@@ -290,7 +290,7 @@ def agendamentos():
                           agendamentos=agendamentos_paginados,
                           status_filtro=status_filtro)
 
-@barbeiro_bp.route('/agendamentos/<int:agendamento_id>/atualizar', methods=['POST'])
+@barbeiro_bp.route('/agendamentos/<string:agendamento_id>/atualizar', methods=['POST'])
 @login_required
 @barbeiro_required
 def atualizar_agendamento(agendamento_id):
