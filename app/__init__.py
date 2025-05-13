@@ -33,6 +33,10 @@ login_manager.login_message_category = 'warning'
 def create_app():
     app = Flask(__name__)
     app.secret_key = os.environ.get("SESSION_SECRET", "safabarbeiros-dev-key")
+    
+    # Register template utility functions
+    from app.utils import inject_now
+    app.context_processor(inject_now)
 
     # Configurações para upload de arquivos
     app.config['UPLOAD_FOLDER'] = os.path.join(app.static_folder, 'uploads')

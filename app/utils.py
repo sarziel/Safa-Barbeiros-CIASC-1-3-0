@@ -65,22 +65,18 @@ def save_picture(file):
     
     return picture_filename
 
-# Funções de utilidade para templates
+from datetime import datetime
+from flask import current_app
+
 def now():
-    """
-    Retorna a data e hora atual para uso em templates.
-    
-    Returns:
-        datetime: Objeto datetime com a data e hora atual
-    """
-    from datetime import datetime
+    """Returns current datetime for templates"""
     return datetime.now()
 
-# Adicione a função now ao contexto global do Jinja
-def inject_now():
-    return {'now': now}
 def get_db():
-    from flask import current_app
-    if not hasattr(mongodb, 'db'):
-        mongodb.db = mongodb.get_database()
-    return mongodb.db
+    """Get database connection"""
+    from app import db
+    return db
+
+def inject_now():
+    """Inject now function into templates"""
+    return dict(now=now)
